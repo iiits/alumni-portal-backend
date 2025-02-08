@@ -1,16 +1,23 @@
 import dotenv from 'dotenv';
 import express, { Application, Request, Response } from 'express';
+import { connectDB } from './config/db';
 
-//For env File
+// Load env variables
 dotenv.config();
 
 const app: Application = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
+
+// Connect to MongoDB
+connectDB();
+
+// Middleware
+app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Welcome to Express & TypeScript Server');
 });
 
 app.listen(port, () => {
-    console.log(`Server is Fire at http://localhost:${port}`);
+    console.log(`Server is running at http://localhost:${port}`);
 });
