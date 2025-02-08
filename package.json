@@ -29,7 +29,8 @@
         "dotenv": "^16.4.7",
         "express": "^4.21.2",
         "mongodb": "^6.13.0",
-        "mongoose": "^8.10.0"
+        "mongoose": "^8.10.0",
+        "uuid": "^11.0.5"
     },
     "devDependencies": {
         "@eslint/js": "^9.20.0",
