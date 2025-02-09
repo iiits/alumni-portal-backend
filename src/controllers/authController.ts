@@ -1,5 +1,8 @@
+import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 import User from '../models/User';
+import VerificationToken from '../models/VerificationToken';
+import { sendVerificationEmail } from '../services/email/emailServices';
 import { apiError, apiSuccess, apiUnauthorized } from '../utils/apiResponses';
 import { sendTokenResponse } from './helpers/authHelper';
 
@@ -10,12 +13,108 @@ export const register = async (
     next: NextFunction,
 ): Promise<void> => {
     try {
-        const user = await User.create(req.body);
-        await sendTokenResponse(user, 201, res);
+        const user = await User.create({
+            ...req.body,
+            verified: false,
+        });
+
+        // Generate verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        await VerificationToken.create({
+            owner: user.id,
+            token: verificationToken,
+        });
+
+        // Send verification email
+        await sendVerificationEmail(user.collegeEmail, verificationToken);
+
+        apiSuccess(
+            res,
+            { email: user.collegeEmail },
+            'Registration successful. Please verify your email.',
+            201,
+        );
     } catch (error) {
         apiError(
             res,
             error instanceof Error ? error.message : 'Registration failed',
+            400,
+        );
+    }
+};
+
+// Add this new controller function
+export const resendVerificationEmail = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ collegeEmail: email });
+
+        if (!user) {
+            apiError(res, 'User not found', 404);
+            return;
+        }
+
+        if (user.verified) {
+            apiError(res, 'Email already verified', 400);
+            return;
+        }
+
+        // Delete any existing verification tokens
+        await VerificationToken.deleteMany({ owner: user.id });
+
+        // Generate new verification token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        await VerificationToken.create({
+            owner: user.id,
+            token: verificationToken,
+        });
+
+        // Send new verification email
+        await sendVerificationEmail(user.collegeEmail, verificationToken);
+
+        apiSuccess(res, null, 'Verification email resent successfully');
+    } catch (error) {
+        apiError(
+            res,
+            error instanceof Error
+                ? error.message
+                : 'Failed to resend verification email',
+            400,
+        );
+    }
+};
+
+// Email verification
+export const verifyEmail = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
+    try {
+        const { token } = req.body;
+
+        const verificationToken = await VerificationToken.findOne({ token });
+        if (!verificationToken) {
+            apiError(res, 'Invalid or expired verification token', 400);
+            return;
+        }
+
+        // Update user verification status
+        await User.findOneAndUpdate(
+            { id: verificationToken.owner },
+            { verified: true },
+        );
+
+        // Delete used token
+        await verificationToken.deleteOne();
+
+        apiSuccess(res, null, 'Email verified successfully');
+    } catch (error) {
+        apiError(
+            res,
+            error instanceof Error ? error.message : 'Verification failed',
             400,
         );
     }
