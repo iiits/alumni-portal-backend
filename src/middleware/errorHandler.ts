@@ -1,5 +1,5 @@
-import { apiError } from '@/utils/apiResponses';
 import { NextFunction, Request, Response } from 'express';
+import { apiError } from '../utils/apiResponses';
 
 export class AppError extends Error {
     statusCode: number;

@@ -1,6 +1,6 @@
-import { apiError, apiSuccess, apiUnauthorized } from '@/utils/apiResponses';
 import { NextFunction, Request, Response } from 'express';
 import User from '../models/User';
+import { apiError, apiSuccess, apiUnauthorized } from '../utils/apiResponses';
 import { sendTokenResponse } from './helpers/authHelper';
 
 // Register user

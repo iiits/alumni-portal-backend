@@ -1,6 +1,6 @@
-import { apiError, apiNotFound, apiSuccess } from '@/utils/apiResponses';
 import { Request, Response } from 'express';
 import AlumniDetails from '../models/AlumniDetails';
+import { apiError, apiNotFound, apiSuccess } from '../utils/apiResponses';
 
 // Create a new alumni details entry
 export const createAlumniDetails = async (req: Request, res: Response) => {

@@ -28,7 +28,7 @@ export interface IUser extends Document {
     }[];
     bio?: string;
     role: 'admin' | 'alumni' | 'student';
-    alumniDetails?: mongoose.Types.ObjectId;
+    alumniDetails?: String;
     comparePassword(candidatePassword: string): Promise<boolean>;
     getSignedJwtToken(): string;
 }
@@ -77,7 +77,7 @@ const UserSchema = new mongoose.Schema<IUser>({
         default: 'student',
     },
     alumniDetails: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         ref: 'AlumniDetails',
     },
 });

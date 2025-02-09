@@ -1,6 +1,6 @@
-import { apiError, apiNotFound, apiSuccess } from '@/utils/apiResponses';
 import { Request, Response } from 'express';
 import Event from '../models/Event';
+import { apiError, apiNotFound, apiSuccess } from '../utils/apiResponses';
 
 // Create a new event
 export const createEvent = async (req: Request, res: Response) => {

@@ -11,7 +11,7 @@ export interface IEvent extends Document {
         description: string;
     };
     type: 'alumni' | 'college' | 'club' | 'others';
-    postedBy: mongoose.Types.ObjectId;
+    postedBy: String;
 }
 
 const EventSchema = new mongoose.Schema<IEvent>({
@@ -30,7 +30,7 @@ const EventSchema = new mongoose.Schema<IEvent>({
         required: true,
     },
     postedBy: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         ref: 'User',
         required: true,
     },

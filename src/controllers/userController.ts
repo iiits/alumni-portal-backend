@@ -1,14 +1,19 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
+import { apiError, apiNotFound, apiSuccess } from '../utils/apiResponses';
 
 // Create a new user
 export const createUser = async (req: Request, res: Response) => {
     try {
         const user = new User(req.body);
         await user.save();
-        res.status(201).json(user);
+        return apiSuccess(res, user, 'User created successfully', 201);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to create user',
+            400,
+        );
     }
 };
 
@@ -16,9 +21,12 @@ export const createUser = async (req: Request, res: Response) => {
 export const getUsers = async (req: Request, res: Response) => {
     try {
         const users = await User.find();
-        res.status(200).json(users);
+        return apiSuccess(res, users, 'Users retrieved successfully');
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to fetch users',
+        );
     }
 };
 
@@ -27,11 +35,14 @@ export const getUserById = async (req: Request, res: Response) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return apiNotFound(res, 'User not found');
         }
-        res.status(200).json(user);
+        return apiSuccess(res, user, 'User retrieved successfully');
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to fetch user',
+        );
     }
 };
 
@@ -43,11 +54,15 @@ export const updateUser = async (req: Request, res: Response) => {
             runValidators: true,
         });
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return apiNotFound(res, 'User not found');
         }
-        res.status(200).json(user);
+        return apiSuccess(res, user, 'User updated successfully');
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to update user',
+            400,
+        );
     }
 };
 
@@ -56,10 +71,13 @@ export const deleteUser = async (req: Request, res: Response) => {
     try {
         const user = await User.findByIdAndDelete(req.params.id);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return apiNotFound(res, 'User not found');
         }
-        res.status(200).json({ message: 'User deleted successfully' });
+        return apiSuccess(res, null, 'User deleted successfully');
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to delete user',
+        );
     }
 };
