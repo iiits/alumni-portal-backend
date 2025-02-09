@@ -18,19 +18,11 @@
         "build": "npx tsc --noEmit",
         "start": "node dist/index.js",
         "dev": "nodemon src/index.ts",
-        "prepare": "husky"
-    },
-    "husky": {
-        "hooks": {
-            "pre-commit": "npx lint-staged",
-            "pre-push": "npm run build"
-        },
-        "lint-staged": {
-            "**/*": "prettier --write --ignore-unknown",
-            "*.ts": "npx tslint"
-        }
+        "prepare": "husky",
+        "format": "prettier --write --ignore-unknown \"src/*\""
     },
     "dependencies": {
+        "@types/js-yaml": "^4.0.9",
         "bcryptjs": "^2.4.3",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
@@ -39,11 +31,14 @@
         "express": "^4.21.2",
         "express-rate-limit": "^7.5.0",
         "helmet": "^8.0.0",
+        "js-yaml": "^4.1.0",
         "jsonwebtoken": "^9.0.2",
         "mongodb": "^6.13.0",
         "mongoose": "^8.10.0",
         "morgan": "^1.10.0",
         "nodemailer": "^6.10.0",
+        "swagger-jsdoc": "^6.2.8",
+        "swagger-ui-express": "^5.0.1",
         "uuid": "^11.0.5",
         "winston": "^3.17.0"
     },
@@ -58,6 +53,8 @@
         "@types/jsonwebtoken": "^9.0.8",
         "@types/morgan": "^1.9.9",
         "@types/nodemailer": "^6.4.17",
+        "@types/swagger-jsdoc": "^6.0.4",
+        "@types/swagger-ui-express": "^4.1.7",
         "eslint": "^9.20.0",
         "globals": "^15.14.0",
         "husky": "^9.1.7",
