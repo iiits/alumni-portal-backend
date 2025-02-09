@@ -3,6 +3,7 @@ import mongoose, { Document } from 'mongoose';
 export interface IVerificationToken extends Document {
     owner: string;
     token: string;
+    failedAttempts: number;
     createdAt: Date;
 }
 
@@ -15,6 +16,10 @@ const verificationTokenSchema = new mongoose.Schema({
     token: {
         type: String,
         required: true,
+    },
+    failedAttempts: {
+        type: Number,
+        default: 0,
     },
     createdAt: {
         type: Date,

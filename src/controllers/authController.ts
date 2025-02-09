@@ -62,6 +62,18 @@ export const resendVerificationEmail = async (
             return;
         }
 
+        const existingToken = await VerificationToken.findOne({
+            owner: user.id,
+        });
+        if (existingToken) {
+            apiError(
+                res,
+                'Please wait 1 hour before requesting another verification email',
+                429,
+            );
+            return;
+        }
+
         // Delete any existing verification tokens
         await VerificationToken.deleteMany({ owner: user.id });
 
@@ -98,6 +110,29 @@ export const verifyEmail = async (
         const verificationToken = await VerificationToken.findOne({ token });
         if (!verificationToken) {
             apiError(res, 'Invalid or expired verification token', 400);
+            return;
+        }
+
+        // Check if max failed attempts reached
+        if (verificationToken.failedAttempts >= 5) {
+            await verificationToken.deleteOne();
+            apiError(
+                res,
+                'Maximum verification attempts exceeded. Please request a new verification email.',
+                400,
+            );
+            return;
+        }
+
+        const user = await User.findOne({ id: verificationToken.owner });
+        if (!user) {
+            apiError(res, 'User not found', 404);
+            return;
+        }
+
+        if (user.verified) {
+            await verificationToken.deleteOne();
+            apiError(res, 'Email is already verified', 400);
             return;
         }
 

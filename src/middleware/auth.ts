@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
-import { apiUnauthorized } from '../utils/apiResponses';
+import { apiError, apiUnauthorized } from '../utils/apiResponses';
 
 declare global {
     namespace Express {
@@ -54,4 +54,16 @@ export const protect = async (
             error instanceof Error ? error.message : 'Not authorized',
         );
     }
+};
+
+export const requireVerified = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+): Promise<void> => {
+    if (!req.user.verified) {
+        apiError(res, 'Please verify your email first', 403);
+        return;
+    }
+    next();
 };
