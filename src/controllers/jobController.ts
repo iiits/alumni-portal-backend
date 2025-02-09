@@ -1,109 +1,110 @@
-import { Request, Response } from "express";
-import Job from "../models/Job";
+import { Request, Response } from 'express';
+import Job from '../models/Job';
+import { apiError, apiNotFound, apiSuccess } from '../utils/apiResponses';
 
-/**
- * @desc Create a new job posting
- * @route POST /api/jobs
- */
-export const createJob = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id, name, company, jobTitle, eligibility, description, type, stipend, duration, workType, links, postedBy } =
-      req.body;
+export const createJob = async (req: Request, res: Response) => {
+    try {
+        const {
+            id,
+            name,
+            company,
+            jobTitle,
+            eligibility,
+            description,
+            type,
+            stipend,
+            duration,
+            workType,
+            links,
+            postedBy,
+        } = req.body;
 
-    const job = new Job({
-      id,
-      name,
-      company,
-      jobTitle,
-      eligibility,
-      description,
-      type,
-      stipend,
-      duration,
-      workType,
-      links,
-      postedBy,
-    });
+        const job = new Job({
+            id,
+            name,
+            company,
+            jobTitle,
+            eligibility,
+            description,
+            type,
+            stipend,
+            duration,
+            workType,
+            links,
+            postedBy,
+        });
 
-    await job.save();
-    res.status(201).json({ message: "Job posted successfully", job });
-  } catch (error) {
-    res.status(500).json({ message: "Server Error", error: (error as Error).message });
-  }
-};
-
-/**
- * @desc Get all job postings
- * @route GET /api/jobs
- */
-export const getJobs = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const jobs = await Job.find().populate("postedBy", "name email");
-    res.status(200).json(jobs);
-  } catch (error) {
-    res.status(500).json({ message: "Server Error", error: (error as Error).message });
-  }
-};
-
-/**
- * @desc Get a single job posting by ID
- * @route GET /api/jobs/:id
- */
-export const getJobById = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const job = await Job.findOne({ id: req.params.id }).populate("postedBy", "name email");
-
-    if (!job) {
-      res.status(404).json({ message: "Job not found" });
-      return;
+        await job.save();
+        return apiSuccess(res, job, 'Job posted successfully', 201);
+    } catch (error) {
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to create job',
+            400,
+        );
     }
-
-    res.status(200).json(job);
-  } catch (error) {
-    res.status(500).json({ message: "Server Error", error: (error as Error).message });
-  }
 };
 
-/**
- * @desc Update a job posting
- * @route PUT /api/jobs/:id
- */
-export const updateJob = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { name, company, jobTitle, eligibility, description, type, stipend, duration, workType, links } = req.body;
-
-    const job = await Job.findOneAndUpdate(
-      { id: req.params.id },
-      { name, company, jobTitle, eligibility, description, type, stipend, duration, workType, links },
-      { new: true }
-    );
-
-    if (!job) {
-      res.status(404).json({ message: "Job not found" });
-      return;
+export const getJobs = async (req: Request, res: Response) => {
+    try {
+        const jobs = await Job.find().populate('postedBy', 'name email');
+        return apiSuccess(res, jobs, 'Jobs retrieved successfully');
+    } catch (error) {
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to fetch jobs',
+        );
     }
-
-    res.status(200).json({ message: "Job updated successfully", job });
-  } catch (error) {
-    res.status(500).json({ message: "Server Error", error: (error as Error).message });
-  }
 };
 
-/**
- * @desc Delete a job posting
- * @route DELETE /api/jobs/:id
- */
-export const deleteJob = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const job = await Job.findOneAndDelete({ id: req.params.id });
-
-    if (!job) {
-      res.status(404).json({ message: "Job not found" });
-      return;
+export const getJobById = async (req: Request, res: Response) => {
+    try {
+        const job = await Job.findById(req.params.id).populate(
+            'postedBy',
+            'name email',
+        );
+        if (!job) {
+            return apiNotFound(res, 'Job not found');
+        }
+        return apiSuccess(res, job, 'Job retrieved successfully');
+    } catch (error) {
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to fetch job',
+        );
     }
+};
 
-    res.status(200).json({ message: "Job deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Server Error", error: (error as Error).message });
-  }
+export const updateJob = async (req: Request, res: Response) => {
+    try {
+        const job = await Job.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true,
+        });
+        if (!job) {
+            return apiNotFound(res, 'Job not found');
+        }
+        return apiSuccess(res, job, 'Job updated successfully');
+    } catch (error) {
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to update job',
+            400,
+        );
+    }
+};
+
+export const deleteJob = async (req: Request, res: Response) => {
+    try {
+        const job = await Job.findByIdAndDelete(req.params.id);
+        if (!job) {
+            return apiNotFound(res, 'Job not found');
+        }
+        return apiSuccess(res, null, 'Job deleted successfully');
+    } catch (error) {
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to delete job',
+        );
+    }
 };
