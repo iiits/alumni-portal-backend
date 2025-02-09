@@ -4,8 +4,10 @@ import dotenv from 'dotenv';
 import express, { Application } from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+import swaggerUi from 'swagger-ui-express';
 import { connectDB } from './config/db';
 import { verifyTransporter } from './config/email';
+import { specs } from './config/swagger';
 import routes from './routes';
 import { morganMiddleware } from './utils/logger';
 
@@ -45,6 +47,11 @@ verifyTransporter();
 
 // Mount API routes
 app.use('/api', routes);
+
+// Swagger Documentation
+if (process.env.SWAGGER_ENABLED === 'true') {
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+}
 
 const port = process.env.PORT || 3001;
 

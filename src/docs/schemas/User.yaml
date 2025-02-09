@@ -1,0 +1,74 @@
+components:
+    schemas:
+        User:
+            type: object
+            required:
+                - name
+                - collegeEmail
+                - userId
+                - username
+                - password
+                - batch
+                - department
+            properties:
+                name:
+                    type: string
+                    description: User's full name
+                collegeEmail:
+                    type: string
+                    format: email
+                    description: College email address
+                personalEmail:
+                    type: string
+                    format: email
+                    description: Optional personal email address
+                userId:
+                    type: string
+                    pattern: '^[AS]\d{4}00[123]\d{4}$'
+                    description: College ID number
+                username:
+                    type: string
+                    description: Unique username
+                password:
+                    type: string
+                    format: password
+                    description: User password
+                profilePicture:
+                    type: string
+                    description: URL to user's profile picture
+                batch:
+                    type: number
+                    description: Graduation batch year
+                department:
+                    type: string
+                    enum: [AIDS, CSE, ECE]
+                    description: Department name
+                profiles:
+                    type: array
+                    items:
+                        type: object
+                        properties:
+                            type:
+                                type: string
+                                enum:
+                                    [
+                                        youtube,
+                                        reddit,
+                                        linkedin,
+                                        twitter,
+                                        instagram,
+                                        facebook,
+                                        discord,
+                                        github,
+                                    ]
+                            link:
+                                type: string
+                                format: uri
+                            visibility:
+                                type: string
+                                enum: [yes, no]
+                                default: yes
+                    description: Social media profiles
+                bio:
+                    type: string
+                    description: User's biography

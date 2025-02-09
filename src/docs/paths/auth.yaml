@@ -1,0 +1,126 @@
+paths:
+    /auth/register:
+        post:
+            tags:
+                - Authentication
+            summary: Register a new user
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/User'
+            responses:
+                201:
+                    description: Registration successful
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    data:
+                                        type: object
+                                        properties:
+                                            email:
+                                                type: string
+                                    message:
+                                        type: string
+
+    /auth/login:
+        post:
+            tags:
+                - Authentication
+            summary: Login user
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - collegeEmail
+                                - password
+                            properties:
+                                collegeEmail:
+                                    type: string
+                                    format: email
+                                password:
+                                    type: string
+                                    format: password
+            responses:
+                200:
+                    description: Login successful
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    token:
+                                        type: string
+
+    /auth/verify-email:
+        post:
+            tags:
+                - Authentication
+            summary: Verify email address
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - token
+                            properties:
+                                token:
+                                    type: string
+            responses:
+                200:
+                    description: Email verified successfully
+
+    /auth/resend-verification:
+        post:
+            tags:
+                - Authentication
+            summary: Resend verification email
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - email
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+            responses:
+                200:
+                    description: Verification email sent successfully
+                429:
+                    description: Too many requests
+
+    /auth/me:
+        get:
+            tags:
+                - Authentication
+            summary: Get current user profile
+            security:
+                - bearerAuth: []
+            responses:
+                200:
+                    description: User profile retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    data:
+                                        $ref: '#/components/schemas/User'

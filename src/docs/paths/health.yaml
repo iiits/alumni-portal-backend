@@ -1,0 +1,17 @@
+paths:
+    /health:
+        get:
+            tags:
+                - Health
+            summary: Check API health
+            responses:
+                200:
+                    description: API is healthy
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: string
+                                        example: ok
