@@ -1,3 +1,4 @@
+import { apiError, apiNotFound, apiSuccess } from '@/utils/apiResponses';
 import { Request, Response } from 'express';
 import Event from '../models/Event';
 
@@ -6,9 +7,13 @@ export const createEvent = async (req: Request, res: Response) => {
     try {
         const event = new Event(req.body);
         await event.save();
-        res.status(201).json(event);
+        return apiSuccess(res, event, 'Event created successfully', 201);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to create event',
+            400,
+        );
     }
 };
 
@@ -16,9 +21,12 @@ export const createEvent = async (req: Request, res: Response) => {
 export const getEvents = async (req: Request, res: Response) => {
     try {
         const events = await Event.find();
-        res.status(200).json(events);
+        return apiSuccess(res, events, 'Events retrieved successfully');
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to fetch events',
+        );
     }
 };
 
@@ -27,24 +35,34 @@ export const getEventById = async (req: Request, res: Response) => {
     try {
         const event = await Event.findById(req.params.id);
         if (!event) {
-            return res.status(404).json({ message: 'Event not found' });
+            return apiNotFound(res, 'Event not found');
         }
-        res.status(200).json(event);
+        return apiSuccess(res, event, 'Event retrieved successfully');
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to fetch event',
+        );
     }
 };
 
 // Update an event by ID
 export const updateEvent = async (req: Request, res: Response) => {
     try {
-        const event = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const event = await Event.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true,
+        });
         if (!event) {
-            return res.status(404).json({ message: 'Event not found' });
+            return apiNotFound(res, 'Event not found');
         }
-        res.status(200).json(event);
+        return apiSuccess(res, event, 'Event updated successfully');
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to update event',
+            400,
+        );
     }
 };
 
@@ -53,10 +71,13 @@ export const deleteEvent = async (req: Request, res: Response) => {
     try {
         const event = await Event.findByIdAndDelete(req.params.id);
         if (!event) {
-            return res.status(404).json({ message: 'Event not found' });
+            return apiNotFound(res, 'Event not found');
         }
-        res.status(200).json({ message: 'Event deleted successfully' });
+        return apiSuccess(res, null, 'Event deleted successfully');
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to delete event',
+        );
     }
 };
