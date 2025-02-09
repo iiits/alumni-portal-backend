@@ -5,6 +5,7 @@ import express, { Application } from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { connectDB } from './config/db';
+import { verifyTransporter } from './config/email';
 import routes from './routes';
 import { morganMiddleware } from './utils/logger';
 
@@ -38,6 +39,9 @@ const limiter = rateLimit({
     max: Number(process.env.RATE_LIMIT_MAX_REQUESTS),
 });
 app.use('/api/', limiter);
+
+// Mail service verification
+verifyTransporter();
 
 // Mount API routes
 app.use('/api', routes);
