@@ -6,6 +6,11 @@ import { sendVerificationEmail } from '../services/email/emailServices';
 import { apiError, apiSuccess, apiUnauthorized } from '../utils/apiResponses';
 import { sendTokenResponse } from './helpers/authHelper';
 
+// Regex patterns to determine the type of input
+const collegeEmailPattern = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*@iiits\.in$/;
+const personalEmailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const userIdPattern = /^[AS]\d{4}00[123]\d{4}$/;
+
 // Register user
 export const register = async (
     req: Request,
@@ -155,26 +160,39 @@ export const verifyEmail = async (
     }
 };
 
-// Login user
-// Login user and return relevant details along with token
+// Login user with multiple identifier options
 export const login = async (req: Request, res: Response): Promise<void> => {
-    const { collegeEmail, password } = req.body;
+    const { identifier, password } = req.body; // "identifier" can be email (college/personal) or user ID
 
-    if (!collegeEmail || !password) {
-        apiError(res, 'Please provide email and password', 400);
+    if (!identifier || !password) {
+        apiError(res, 'Please provide an email or user ID and password', 400);
         return;
     }
 
     try {
-        const user = await User.findOne({ collegeEmail }).select('+password');
+        let query = {};
+
+        if (collegeEmailPattern.test(identifier)) {
+            query = { collegeEmail: identifier };
+        } else if (personalEmailPattern.test(identifier)) {
+            query = { personalEmail: identifier };
+        } else if (userIdPattern.test(identifier)) {
+            query = { userId: identifier };
+        } else {
+            apiError(res, 'Invalid email or user ID format', 400);
+            return;
+        }
+
+        // Find user based on detected field
+        const user = await User.findOne(query).select('+password');
 
         if (!user) {
             apiUnauthorized(res, 'Invalid credentials');
             return;
         }
 
+        // Check password
         const isMatch = await user.comparePassword(password);
-
         if (!isMatch) {
             apiUnauthorized(res, 'Invalid credentials');
             return;
@@ -188,16 +206,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             id: user.id,
             name: user.name,
             collegeEmail: user.collegeEmail,
-            personalEmail: user.personalEmail, // Now required in model
+            personalEmail: user.personalEmail,
             userId: user.userId,
             username: user.username,
-            profilePicture: user.profilePicture || null, // Optional
+            profilePicture: user.profilePicture || null,
             batch: user.batch,
             department: user.department,
-            profiles: user.profiles, // Social media links
-            bio: user.bio || null, // Optional
-            role: user.role, // Student, Alumni, Admin
-            alumniDetails: user.alumniDetails || null, // If applicable
+            profiles: user.profiles,
+            bio: user.bio || null,
+            role: user.role,
+            alumniDetails: user.alumniDetails || null,
         };
 
         // Return response with token & user details
