@@ -38,7 +38,7 @@ const UserSchema = new mongoose.Schema<IUser>({
     id: { type: String, default: () => crypto.randomUUID(), unique: true },
     name: { type: String, required: true, trim: true },
     collegeEmail: { type: String, required: true, unique: true },
-    personalEmail: { type: String, unique: true },
+    personalEmail: { type: String, unique: true, required: true },
     userId: {
         type: String,
         required: true,
