@@ -156,11 +156,8 @@ export const verifyEmail = async (
 };
 
 // Login user
-export const login = async (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-): Promise<void> => {
+// Login user and return relevant details along with token
+export const login = async (req: Request, res: Response): Promise<void> => {
     const { collegeEmail, password } = req.body;
 
     if (!collegeEmail || !password) {
@@ -183,21 +180,67 @@ export const login = async (
             return;
         }
 
-        await sendTokenResponse(user, 200, res);
+        // Generate JWT token
+        const token = user.getSignedJwtToken();
+
+        // Structure user details for frontend
+        const userDetails = {
+            id: user.id,
+            name: user.name,
+            collegeEmail: user.collegeEmail,
+            personalEmail: user.personalEmail, // Now required in model
+            userId: user.userId,
+            username: user.username,
+            profilePicture: user.profilePicture || null, // Optional
+            batch: user.batch,
+            department: user.department,
+            profiles: user.profiles, // Social media links
+            bio: user.bio || null, // Optional
+            role: user.role, // Student, Alumni, Admin
+            alumniDetails: user.alumniDetails || null, // If applicable
+        };
+
+        // Return response with token & user details
+        apiSuccess(res, { token, user: userDetails }, 'Login successful', 200);
     } catch (error) {
         apiError(res, error instanceof Error ? error.message : 'Login failed');
     }
 };
 
-// Get current logged in user
+// Get current logged-in user with relevant details
 export const getMe = async (
     req: Request,
     res: Response,
     next: NextFunction,
 ): Promise<void> => {
     try {
-        const user = await User.findOne({ id: req.user.id });
-        apiSuccess(res, user, 'User profile retrieved successfully');
+        const user = await User.findOne({ id: req.user.id }).select(
+            '-password -verified -__v',
+        ); // Exclude sensitive fields
+
+        if (!user) {
+            apiError(res, 'User not found', 404);
+            return;
+        }
+
+        // Structure the response to include only relevant details
+        const userDetails = {
+            id: user.id,
+            name: user.name,
+            collegeEmail: user.collegeEmail,
+            personalEmail: user.personalEmail, 
+            userId: user.userId,
+            username: user.username,
+            profilePicture: user.profilePicture || null, // Optional
+            batch: user.batch,
+            department: user.department,
+            profiles: user.profiles, // Social media links
+            bio: user.bio || null, // Optional
+            role: user.role, // Student, Alumni, Admin
+            alumniDetails: user.alumniDetails || null, // Only if applicable
+        };
+
+        apiSuccess(res, userDetails, 'User profile retrieved successfully');
     } catch (error) {
         apiError(
             res,
