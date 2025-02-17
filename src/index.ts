@@ -39,6 +39,7 @@ app.use(morganMiddleware);
 const limiter = rateLimit({
     windowMs: Number(process.env.RATE_LIMIT_WINDOW) * 60 * 1000,
     max: Number(process.env.RATE_LIMIT_MAX_REQUESTS),
+    skip: req => req.path === '/auth/me',
 });
 app.use('/api/', limiter);
 
