@@ -4,7 +4,6 @@ import User from '../models/User';
 import VerificationToken from '../models/VerificationToken';
 import { sendVerificationEmail } from '../services/email/emailServices';
 import { apiError, apiSuccess, apiUnauthorized } from '../utils/apiResponses';
-import { sendTokenResponse } from './helpers/authHelper';
 
 // Regex patterns to determine the type of input
 const collegeEmailPattern = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*@iiits\.in$/;
@@ -48,7 +47,7 @@ export const register = async (
     }
 };
 
-// Add this new controller function
+// Resend verification email
 export const resendVerificationEmail = async (
     req: Request,
     res: Response,
@@ -246,7 +245,7 @@ export const getMe = async (
             id: user.id,
             name: user.name,
             collegeEmail: user.collegeEmail,
-            personalEmail: user.personalEmail, 
+            personalEmail: user.personalEmail,
             userId: user.userId,
             username: user.username,
             profilePicture: user.profilePicture || null, // Optional
