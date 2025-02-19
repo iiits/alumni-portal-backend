@@ -1,9 +1,8 @@
 import express from 'express';
-import authRoutes from './auth';
-import contactRoutes from './contact'
 import alumniDetailsRoutes from './alumniDetails';
+import authRoutes from './auth';
+import contactRoutes from './contact';
 const router = express.Router();
-
 
 // Health check route
 router.get('/health', (req, res) => {
@@ -12,7 +11,7 @@ router.get('/health', (req, res) => {
 
 // Mount routes
 router.use('/auth', authRoutes);
-router.use('/', contactRoutes);
+router.use('/contactus', contactRoutes);
 router.use('/alumni-details', alumniDetailsRoutes);
 
 export default router;

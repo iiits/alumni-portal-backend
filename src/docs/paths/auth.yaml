@@ -20,20 +20,27 @@ paths:
                                 properties:
                                     success:
                                         type: boolean
+                                        example: true
                                     data:
                                         type: object
                                         properties:
                                             email:
                                                 type: string
+                                                example: 'user@iiits.in'
                                     message:
                                         type: string
+                                        example: 'Registration successful. Please verify your email.'
+                400:
+                    description: Registration failed
+                500:
+                    description: Server error
 
     /auth/login:
         post:
             tags:
                 - Authentication
             summary: Login user
-            description: Allows users to log in using either their college email, personal email, or user ID.
+            description: Login using college email, personal email, or user ID
             requestBody:
                 required: true
                 content:
@@ -46,14 +53,12 @@ paths:
                             properties:
                                 identifier:
                                     type: string
-                                    description: 'Can be a college email, personal email, or user ID.'
-                                    example: 'kusalasameera.g22@iiits.in'
+                                    example: 'user@iiits.in'
                                 password:
                                     type: string
                                     format: password
-                                    example: 'your-password'
             responses:
-                201:
+                200:
                     description: Login successful
                     content:
                         application/json:
@@ -63,55 +68,53 @@ paths:
                                     success:
                                         type: boolean
                                         example: true
-                                    token:
-                                        type: string
-                                        description: JWT token for authentication
-                                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-                                    user:
+                                    data:
                                         type: object
-                                        description: User details
                                         properties:
-                                            id:
+                                            token:
                                                 type: string
-                                                example: 'f834e73c-5e24-4b39-bf38-c00e31b7a1d1'
-                                            name:
-                                                type: string
-                                                example: 'Kusala Sameera Gondela'
-                                            collegeEmail:
-                                                type: string
-                                                example: 'kusalasameera.g22@iiits.in'
-                                            personalEmail:
-                                                type: string
-                                                example: 'sameera@gmail.com'
-                                            userId:
-                                                type: string
-                                                example: 'S20220010121'
-                                            username:
-                                                type: string
-                                                example: 'samsam'
-                                            profilePicture:
-                                                type: string
-                                                example: 'https://example.com/profile.jpg'
-                                            batch:
-                                                type: integer
-                                                example: 2022
-                                            department:
-                                                type: string
-                                                enum: ['AIDS', 'CSE', 'ECE']
-                                                example: 'CSE'
-                                            role:
-                                                type: string
-                                                enum:
-                                                    [
-                                                        'admin',
-                                                        'alumni',
-                                                        'student',
-                                                    ]
-                                                example: 'student'
+                                                example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+                                            user:
+                                                $ref: '#/components/schemas/User'
+                                    message:
+                                        type: string
+                                        example: 'Login successful'
                 400:
-                    description: Invalid input (missing fields or incorrect format)
+                    description: Invalid credentials
                 401:
-                    description: Unauthorized - Invalid credentials
+                    description: Unauthorized
+                500:
+                    description: Server error
+
+    /auth/me:
+        get:
+            tags:
+                - Authentication
+            summary: Get current user profile
+            security:
+                - bearerAuth: []
+            responses:
+                200:
+                    description: User profile retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        $ref: '#/components/schemas/User'
+                                    message:
+                                        type: string
+                                        example: 'User profile retrieved successfully'
+                401:
+                    description: Not authorized
+                403:
+                    description: Email not verified
+                404:
+                    description: User not found
                 500:
                     description: Server error
 
@@ -131,9 +134,27 @@ paths:
                             properties:
                                 token:
                                     type: string
+                                    example: 'verification-token'
             responses:
                 200:
                     description: Email verified successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    message:
+                                        type: string
+                                        example: 'Email verified successfully'
+                400:
+                    description: Invalid or expired token
+                429:
+                    description: Too many verification attempts
+                500:
+                    description: Server error
 
     /auth/resend-verification:
         post:
@@ -152,22 +173,10 @@ paths:
                                 email:
                                     type: string
                                     format: email
+                                    example: 'user@iiits.in'
             responses:
                 200:
                     description: Verification email sent successfully
-                429:
-                    description: Too many requests
-
-    /auth/me:
-        get:
-            tags:
-                - Authentication
-            summary: Get current user profile
-            security:
-                - bearerAuth: []
-            responses:
-                200:
-                    description: User profile retrieved successfully
                     content:
                         application/json:
                             schema:
@@ -175,5 +184,22 @@ paths:
                                 properties:
                                     success:
                                         type: boolean
-                                    data:
-                                        $ref: '#/components/schemas/User'
+                                        example: true
+                                    message:
+                                        type: string
+                                        example: 'Verification email resent successfully'
+                400:
+                    description: Invalid email
+                404:
+                    description: User not found
+                429:
+                    description: Too many requests
+                500:
+                    description: Server error
+
+components:
+    securitySchemes:
+        bearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
