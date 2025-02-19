@@ -1,36 +1,75 @@
-import { Request, Response, NextFunction } from 'express';
-import { sendContactUsEmail } from '../services/email/contactusServices';  // Importing the service function
-import { apiError, apiSuccess } from '../utils/apiResponses';  // For consistent response formatting
+import { NextFunction, Request, Response } from 'express';
+import ContactUs from '../models/ContactUs';
+import User from '../models/User';
+import { sendContactUsEmail } from '../services/email/emailServices';
+import { apiError, apiSuccess } from '../utils/apiResponses';
 
-// Handle contact form submission
-export const submitContactForm = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { email, name, subject, message } = req.body;  // Destructure the form fields from the request body
+export const submitContactForm = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+): Promise<void> => {
+    const { subject, message } = req.body;
+    const userId = req.user?.id;
 
-    // Validate input fields (ensure all required fields are present)
-    if (!email || !name || !subject || !message) {
-        apiError(res, 'All fields (email, name, subject, message) are required', 400);  // Return error if any field is missing
+    if (!subject || !message) {
+        apiError(res, 'Subject and message are required', 400);
         return;
     }
 
     try {
-        // Call the service to send the contact email
-        const success = await sendContactUsEmail(email, name, subject, message);
+        // Get user details
+        const user = await User.findOne({ id: userId });
+        if (!user) {
+            apiError(res, 'User not found', 404);
+            return;
+        }
 
-        // If the email was sent successfully
+        // Create contact entry
+        const contact = await ContactUs.create({
+            user: userId,
+            name: user.name,
+            email: user.collegeEmail,
+            subject,
+            message,
+        });
+
+        // Send email
+        const success = await sendContactUsEmail(
+            user.collegeEmail,
+            user.name,
+            subject,
+            message,
+        );
+
         if (success) {
-            apiSuccess(res, null, 'Your message has been successfully sent. We will get back to you shortly.', 200);
+            apiSuccess(
+                res,
+                { contact },
+                'Your message has been successfully sent. We will get back to you shortly.',
+                200,
+            );
         } else {
-            console.error("Failed to send email to:", process.env.EMAIL_USER);
-            apiError(res, 'Failed to send your message, please try again later.', 500);
+            console.error('Failed to send email to:', process.env.EMAIL_USER);
+            apiError(
+                res,
+                'Failed to send your message, please try again later.',
+                500,
+            );
         }
     } catch (error) {
         console.error('Error handling contact form submission:', error);
-        
-        // Detailed error logging to understand what went wrong
+
         if (error instanceof Error) {
             console.error('Error details:', error.message);
         }
 
-        apiError(res, error instanceof Error ? error.message : 'Failed to send contact form message', 500);  // Handle errors during email sending
+        apiError(
+            res,
+            error instanceof Error
+                ? error.message
+                : 'Failed to send contact form message',
+            500,
+        );
     }
 };
