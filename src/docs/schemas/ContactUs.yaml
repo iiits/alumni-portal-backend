@@ -1,6 +1,6 @@
 components:
     schemas:
-        Contact:
+        ContactUs:
             type: object
             required:
                 - user

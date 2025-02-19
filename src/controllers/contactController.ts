@@ -73,3 +73,50 @@ export const submitContactForm = async (
         );
     }
 };
+
+export const getAllContactForms = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+): Promise<void> => {
+    try {
+        const contactForms = await ContactUs.find().sort({ createdAt: -1 });
+        apiSuccess(
+            res,
+            { contactForms },
+            'Contact forms retrieved successfully',
+            200,
+        );
+    } catch (error) {
+        console.error('Error getting contact forms:', error);
+        apiError(res, 'Failed to get contact forms', 500);
+    }
+};
+
+export const getContactFormForUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+): Promise<void> => {
+    const { userId } = req.body;
+
+    if (!userId) {
+        apiError(res, 'User ID is required', 400);
+        return;
+    }
+
+    try {
+        const contactForms = await ContactUs.find({ user: userId }).sort({
+            createdAt: -1,
+        });
+        apiSuccess(
+            res,
+            { contactForms },
+            'Contact forms retrieved successfully',
+            200,
+        );
+    } catch (error) {
+        console.error('Error getting contact forms:', error);
+        apiError(res, 'Failed to get contact forms', 500);
+    }
+};
