@@ -15,7 +15,7 @@
     "type": "commonjs",
     "main": "index.js",
     "scripts": {
-        "build": "npx tsc && cp -r src/docs dist/docs",
+        "build": "npx tsc && cp -r src/docs dist/",
         "start": "node dist/index.js",
         "dev": "nodemon src/index.ts",
         "prepare": "npx husky",
