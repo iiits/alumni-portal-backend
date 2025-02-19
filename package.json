@@ -15,7 +15,7 @@
     "type": "commonjs",
     "main": "index.js",
     "scripts": {
-        "build": "npx tsc --noEmit",
+        "build": "npx tsc",
         "start": "node dist/index.js",
         "dev": "nodemon src/index.ts",
         "prepare": "npx husky",
