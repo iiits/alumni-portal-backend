@@ -1,0 +1,195 @@
+paths:
+    /alumni-details:
+        post:
+            tags:
+                - Alumni Details
+            summary: Create a new alumni details entry
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AlumniDetails'
+            responses:
+                201:
+                    description: Alumni details created successfully and verification email sent
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        $ref: '#/components/schemas/AlumniDetails'
+                                    message:
+                                        type: string
+                                        example: "Alumni details created successfully and verification email sent"
+                400:
+                    description: Bad request - Validation error
+                401:
+                    description: Unauthorized - User not authenticated
+                500:
+                    description: Internal server error
+
+        get:
+            tags:
+                - Alumni Details
+            summary: Get all alumni details
+            responses:
+                200:
+                    description: Alumni details retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/AlumniDetails'
+                                    message:
+                                        type: string
+                                        example: "Alumni details retrieved successfully"
+                500:
+                    description: Internal server error
+
+    /alumni-details/{id}:
+        get:
+            tags:
+                - Alumni Details
+            summary: Get a single alumni details entry by ID
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the alumni details entry
+            responses:
+                200:
+                    description: Alumni details retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        $ref: '#/components/schemas/AlumniDetails'
+                                    message:
+                                        type: string
+                                        example: "Alumni details retrieved successfully"
+                404:
+                    description: Alumni details not found
+                500:
+                    description: Internal server error
+
+        put:
+            tags:
+                - Alumni Details
+            summary: Update an alumni details entry by ID
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the alumni details entry
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AlumniDetails'
+            responses:
+                200:
+                    description: Alumni details updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        $ref: '#/components/schemas/AlumniDetails'
+                                    message:
+                                        type: string
+                                        example: "Alumni details updated successfully"
+                400:
+                    description: Bad request - Validation error
+                401:
+                    description: Unauthorized - User not authenticated
+                404:
+                    description: Alumni details not found
+                500:
+                    description: Internal server error
+
+        delete:
+            tags:
+                - Alumni Details
+            summary: Delete an alumni details entry by ID
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the alumni details entry
+            responses:
+                200:
+                    description: Alumni details deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    message:
+                                        type: string
+                                        example: "Alumni details deleted successfully"
+                401:
+                    description: Unauthorized - User not authenticated
+                404:
+                    description: Alumni details not found
+                500:
+                    description: Internal server error
+
+components:
+    schemas:
+        AlumniDetails:
+            type: object
+            properties:
+                _id:
+                    type: string
+                    example: "60d0fe4f5311236168a109ca"
+                name:
+                    type: string
+                    example: "John Doe"
+                userId:
+                    type: string
+                    example: "123456789"
+                createdAt:
+                    type: string
+                    format: date-time
+                    example: "2023-05-01T12:34:56Z"
+                updatedAt:
+                    type: string
+                    format: date-time
+                    example: "2023-06-15T08:22:30Z"

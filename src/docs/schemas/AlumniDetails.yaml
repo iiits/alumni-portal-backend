@@ -1,0 +1,118 @@
+components:
+    schemas:
+        AlumniDetails:
+            type: object
+            required:
+                - id
+                - jobPosition
+                - education
+                - location
+                - expertise
+                - verified
+            properties:
+                id:
+                    type: string
+                    description: Unique identifier for the alumni
+                jobPosition:
+                    type: array
+                    description: List of job positions held by the alumni
+                    items:
+                        type: object
+                        required:
+                            - title
+                            - type
+                            - start
+                            - location
+                            - jobType
+                            - ongoing
+                        properties:
+                            title:
+                                type: string
+                                description: Job title
+                            type:
+                                type: string
+                                enum: [full-time, part-time, freelancer, intern, entrepreneur]
+                                description: Type of employment
+                            start:
+                                type: string
+                                format: date
+                                description: Job start date
+                            end:
+                                type: string
+                                format: date
+                                nullable: true
+                                description: Job end date (null if ongoing)
+                            ongoing:
+                                type: boolean
+                                description: Whether the job is ongoing
+                            location:
+                                type: string
+                                description: Job location
+                            jobType:
+                                type: string
+                                enum: [on-site, remote, hybrid]
+                                description: Type of work environment
+                            description:
+                                type: string
+                                description: Optional job description
+                education:
+                    type: array
+                    description: List of educational qualifications
+                    items:
+                        type: object
+                        required:
+                            - school
+                            - degree
+                            - fieldOfStudy
+                            - start
+                            - location
+                            - ongoing
+                        properties:
+                            school:
+                                type: string
+                                description: Name of the institution
+                            degree:
+                                type: string
+                                description: Degree obtained
+                            fieldOfStudy:
+                                type: string
+                                description: Major or field of study
+                            start:
+                                type: string
+                                format: date
+                                description: Start date of education
+                            end:
+                                type: string
+                                format: date
+                                nullable: true
+                                description: Graduation date (null if ongoing)
+                            ongoing:
+                                type: boolean
+                                description: Whether the education is ongoing
+                            location:
+                                type: string
+                                description: Location of the institution
+                            description:
+                                type: string
+                                description: Optional description
+                location:
+                    type: object
+                    required:
+                        - city
+                        - country
+                    properties:
+                        city:
+                            type: string
+                            description: City of residence
+                        country:
+                            type: string
+                            description: Country of residence
+                expertise:
+                    type: array
+                    items:
+                        type: string
+                    description: List of areas of expertise
+                verified:
+                    type: boolean
+                    default: false
+                    description: Whether the alumni details are verified

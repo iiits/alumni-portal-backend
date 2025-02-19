@@ -1,113 +1,162 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import AlumniDetails from '../models/AlumniDetails';
-import { apiError, apiNotFound, apiSuccess } from '../utils/apiResponses';
+import User from '../models/User';
+import { apiError, apiSuccess, apiNotFound } from '../utils/apiResponses';
+import { sendAlumniVerificationEmail } from '../services/email/alumniDetailsService';
 
 // Create a new alumni details entry
-export const createAlumniDetails = async (req: Request, res: Response) => {
+export const createAlumniDetails = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
     try {
-        const alumniDetails = new AlumniDetails(req.body);
-        await alumniDetails.save();
-        return apiSuccess(
-            res,
-            alumniDetails,
-            'Alumni details created successfully',
-            201,
-        );
+        const { jobPosition, education, name, userId, ...rest } = req.body;
+
+        // Ensure end is null if ongoing is true for both jobPosition and education
+        const formattedJobPosition = jobPosition.map((job: any) => ({
+            ...job,
+            end: job.ongoing ? null : job.end,
+        }));
+
+        const formattedEducation = education.map((edu: any) => ({
+            ...edu,
+            end: edu.ongoing ? null : edu.end,
+        }));
+
+        // Retrieve user details using userId
+        const user = await User.findOne({ userId }).lean();
+        if (!user) {
+            apiError(res, 'User not found', 404);
+            return;
+        }
+
+        // Save alumni details in the database (excluding name and userId)
+        const createdAlumni = await AlumniDetails.create({
+            ...rest,
+            jobPosition: formattedJobPosition,
+            education: formattedEducation,
+        });
+
+        // Send verification email using name and userId
+        const emailSent = await sendAlumniVerificationEmail(userId, name);
+        if (!emailSent) {
+            console.error("Failed to send verification email to admin.");
+        }
+
+        apiSuccess(res, createdAlumni, 'Alumni details created successfully and verification email sent', 201);
     } catch (error) {
-        return apiError(
+        apiError(
             res,
-            error instanceof Error
-                ? error.message
-                : 'Failed to create alumni details',
-            400,
+            error instanceof Error ? error.message : 'Failed to create alumni details',
+            400
         );
     }
 };
 
+
+
 // Get all alumni details
-export const getAlumniDetails = async (req: Request, res: Response) => {
+export const getAlumniDetails = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
     try {
-        const alumniList = await AlumniDetails.find();
-        return apiSuccess(
-            res,
-            alumniList,
-            'Alumni details retrieved successfully',
-        );
+        const alumniList = await AlumniDetails.find().lean();
+        apiSuccess(res, alumniList, 'Alumni details retrieved successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
-            error instanceof Error
-                ? error.message
-                : 'Failed to fetch alumni details',
+            error instanceof Error ? error.message : 'Failed to fetch alumni details'
         );
     }
 };
 
 // Get a single alumni details entry by ID
-export const getAlumniDetailsById = async (req: Request, res: Response) => {
+export const getAlumniDetailsById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
     try {
-        const alumniDetails = await AlumniDetails.findById(req.params.id);
+        const alumniDetails = await AlumniDetails.findById(req.params.id).lean();
         if (!alumniDetails) {
-            return apiNotFound(res, 'Alumni details not found');
+            apiNotFound(res, 'Alumni details not found');
+            return;
         }
-        return apiSuccess(
-            res,
-            alumniDetails,
-            'Alumni details retrieved successfully',
-        );
+        apiSuccess(res, alumniDetails, 'Alumni details retrieved successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
-            error instanceof Error
-                ? error.message
-                : 'Failed to fetch alumni details',
+            error instanceof Error ? error.message : 'Failed to fetch alumni details'
         );
     }
 };
 
 // Update an alumni details entry by ID
-export const updateAlumniDetails = async (req: Request, res: Response) => {
+export const updateAlumniDetails = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
     try {
+        const { jobPosition, education, ...rest } = req.body;
+
+        // Ensure end is null if ongoing is true for both jobPosition and education
+        const formattedJobPosition = jobPosition?.map((job: any) => ({
+            ...job,
+            end: job.ongoing ? null : job.end,
+        }));
+
+        const formattedEducation = education?.map((edu: any) => ({
+            ...edu,
+            end: edu.ongoing ? null : edu.end,
+        }));
+
+        const updateData = {
+            ...rest,
+            ...(jobPosition && { jobPosition: formattedJobPosition }),
+            ...(education && { education: formattedEducation }),
+        };
+
         const alumniDetails = await AlumniDetails.findByIdAndUpdate(
             req.params.id,
-            req.body,
-            { new: true, runValidators: true },
+            updateData,
+            { new: true, runValidators: true }
         );
+
         if (!alumniDetails) {
-            return apiNotFound(res, 'Alumni details not found');
+            apiNotFound(res, 'Alumni details not found');
+            return;
         }
-        return apiSuccess(
-            res,
-            alumniDetails,
-            'Alumni details updated successfully',
-        );
+        apiSuccess(res, alumniDetails, 'Alumni details updated successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
-            error instanceof Error
-                ? error.message
-                : 'Failed to update alumni details',
-            400,
+            error instanceof Error ? error.message : 'Failed to update alumni details',
+            400
         );
     }
 };
 
 // Delete an alumni details entry by ID
-export const deleteAlumniDetails = async (req: Request, res: Response) => {
+export const deleteAlumniDetails = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
     try {
-        const alumniDetails = await AlumniDetails.findByIdAndDelete(
-            req.params.id,
-        );
+        const alumniDetails = await AlumniDetails.findByIdAndDelete(req.params.id);
         if (!alumniDetails) {
-            return apiNotFound(res, 'Alumni details not found');
+            apiNotFound(res, 'Alumni details not found');
+            return;
         }
-        return apiSuccess(res, null, 'Alumni details deleted successfully');
+        apiSuccess(res, null, 'Alumni details deleted successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
-            error instanceof Error
-                ? error.message
-                : 'Failed to delete alumni details',
+            error instanceof Error ? error.message : 'Failed to delete alumni details'
         );
     }
 };

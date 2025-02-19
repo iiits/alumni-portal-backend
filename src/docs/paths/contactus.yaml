@@ -1,0 +1,50 @@
+paths:
+    /contactus:
+        post:
+            tags:
+                - Contact Us
+            summary: Submit a contact form
+            description: Allows users to submit a contact form with their message.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - email
+                                - name
+                                - subject
+                                - message
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                    example: 'user@example.com'
+                                name:
+                                    type: string
+                                    example: 'John Doe'
+                                subject:
+                                    type: string
+                                    example: 'Inquiry about alumni portal'
+                                message:
+                                    type: string
+                                    example: 'I would like to know more about the alumni verification process.'
+            responses:
+                200:
+                    description: Contact form submitted successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    message:
+                                        type: string
+                                        example: 'Your message has been successfully sent. We will get back to you shortly.'
+                400:
+                    description: Bad request - Missing or invalid fields
+                500:
+                    description: Server error
