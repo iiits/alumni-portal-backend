@@ -11,7 +11,8 @@ export const createAlumniDetails = async (
     next: NextFunction,
 ): Promise<void> => {
     try {
-        const { jobPosition, education, name, userId, ...rest } = req.body;
+        const userId = req.user?.id;
+        const { jobPosition, education, name, ...rest } = req.body;
 
         const formattedJobPosition = jobPosition.map((job: any) => ({
             ...job,
@@ -43,7 +44,7 @@ export const createAlumniDetails = async (
         apiSuccess(
             res,
             createdAlumni,
-            'Alumni details created successfully and verification email sent',
+            'Alumni details created successfully and verification email sent. Waiting for admin approval.',
             201,
         );
     } catch (error) {
