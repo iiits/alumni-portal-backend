@@ -1,0 +1,31 @@
+components:
+    schemas:
+        Contact:
+            type: object
+            required:
+                - user
+                - name
+                - email
+                - subject
+                - message
+            properties:
+                user:
+                    type: string
+                    description: User ID reference
+                name:
+                    type: string
+                    description: User's name (auto-filled)
+                email:
+                    type: string
+                    format: email
+                    description: User's email (auto-filled)
+                subject:
+                    type: string
+                    description: Subject of the contact message
+                message:
+                    type: string
+                    description: Contact message content
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: Timestamp of message creation

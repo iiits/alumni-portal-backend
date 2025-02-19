@@ -1,0 +1,47 @@
+paths:
+    /contactus:
+        post:
+            tags:
+                - Contact
+            summary: Submit contact form
+            description: Submit a contact form - user details are automatically fetched
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - subject
+                                - message
+                            properties:
+                                subject:
+                                    type: string
+                                    example: 'Query about Alumni Meet'
+                                message:
+                                    type: string
+                                    example: 'I would like to know more details about...'
+            responses:
+                200:
+                    description: Message sent successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    data:
+                                        $ref: '#/components/schemas/Contact'
+                                    message:
+                                        type: string
+                400:
+                    description: Missing required fields
+                401:
+                    description: Not authenticated
+                404:
+                    description: User not found
+                500:
+                    description: Server error
