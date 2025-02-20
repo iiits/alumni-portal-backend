@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import ContactUs from '../models/ContactUs';
 import User from '../models/User';
 import { sendContactUsEmail } from '../services/email/emailServices';
-import { apiError, apiSuccess } from '../utils/apiResponses';
+import { apiError, apiNotFound, apiSuccess } from '../utils/apiResponses';
 
 export const submitContactForm = async (
     req: Request,
@@ -21,7 +21,7 @@ export const submitContactForm = async (
         // Get user details
         const user = await User.findOne({ id: userId });
         if (!user) {
-            apiError(res, 'User not found', 404);
+            apiNotFound(res, 'User not found');
             return;
         }
 
