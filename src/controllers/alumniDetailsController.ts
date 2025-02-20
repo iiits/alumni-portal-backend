@@ -26,7 +26,7 @@ export const createAlumniDetails = async (
 
         const user = await User.findOne({ userId }).lean();
         if (!user) {
-            apiError(res, 'User not found', 404);
+            apiNotFound(res, 'User not found');
             return;
         }
 

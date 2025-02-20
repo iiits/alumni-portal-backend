@@ -1,6 +1,7 @@
 import { transporter } from '../../config/email';
 import { renderAlumniVerificationEmail } from './templates/alumniDetailsVerification';
 import { renderContactFormEmail } from './templates/contactUs';
+import { renderPasswordResetEmail } from './templates/passwordReset';
 import { renderVerificationEmail } from './templates/verification';
 
 const adminEmails = process.env.EMAIL_ADMINS?.split(',') || [];
@@ -62,5 +63,17 @@ export const sendAlumniVerificationEmail = async (
         to: adminEmails.join(','),
         subject: `Alumni Verification - ${name}`,
         html: emailHtml,
+    });
+};
+
+export const sendPasswordResetEmail = async (
+    emails: string[],
+    token: string,
+) => {
+    const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
+    return sendEmail({
+        to: emails.join(','),
+        subject: 'Password Reset Request',
+        html: renderPasswordResetEmail(resetUrl),
     });
 };

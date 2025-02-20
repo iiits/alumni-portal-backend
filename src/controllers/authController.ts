@@ -1,9 +1,19 @@
+import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
+import PasswordResetToken from '../models/PasswordResetToken';
 import User from '../models/User';
 import VerificationToken from '../models/VerificationToken';
-import { sendVerificationEmail } from '../services/email/emailServices';
-import { apiError, apiSuccess, apiUnauthorized } from '../utils/apiResponses';
+import {
+    sendPasswordResetEmail,
+    sendVerificationEmail,
+} from '../services/email/emailServices';
+import {
+    apiError,
+    apiNotFound,
+    apiSuccess,
+    apiUnauthorized,
+} from '../utils/apiResponses';
 
 // Regex patterns to determine the type of input
 const collegeEmailPattern = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*@iiits\.in$/;
@@ -57,7 +67,7 @@ export const resendVerificationEmail = async (
         const user = await User.findOne({ collegeEmail: email });
 
         if (!user) {
-            apiError(res, 'User not found', 404);
+            apiNotFound(res, 'User not found');
             return;
         }
 
@@ -130,7 +140,7 @@ export const verifyEmail = async (
 
         const user = await User.findOne({ id: verificationToken.owner });
         if (!user) {
-            apiError(res, 'User not found', 404);
+            apiNotFound(res, 'User not found');
             return;
         }
 
@@ -224,6 +234,96 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+// Generate and send password reset link
+export const requestPasswordReset = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+
+        if (!userId) {
+            apiError(res, 'UserId not provided', 400);
+            return;
+        }
+
+        const user = await User.findOne({
+            id: userId,
+        });
+
+        if (!user) {
+            apiNotFound(res, 'User not found');
+            return;
+        }
+
+        // Generate & Save password reset token
+        const token = crypto.randomBytes(32).toString('hex');
+
+        await PasswordResetToken.create({
+            owner: user.id,
+            token: token,
+        });
+
+        // Send password reset email
+        await sendPasswordResetEmail(
+            [user.collegeEmail, user.personalEmail].filter(
+                (email): email is string => email !== undefined,
+            ),
+            token,
+        );
+
+        apiSuccess(res, null, 'Password reset link sent to email');
+    } catch (error) {
+        apiError(
+            res,
+            error instanceof Error
+                ? error.message
+                : 'Password reset request failed',
+        );
+    }
+};
+
+export const resetPassword = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
+    try {
+        const { token, newPassword } = req.body;
+
+        const resetToken = await PasswordResetToken.findOne({ token });
+        if (!resetToken) {
+            apiError(res, 'Invalid or expired reset token', 400);
+            return;
+        }
+
+        const user = await User.find({ id: resetToken.owner });
+        if (!user) {
+            apiNotFound(res, 'User not found');
+            return;
+        }
+
+        // Hash new password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // Update password
+        await User.findOneAndUpdate(
+            { id: resetToken.owner },
+            { password: hashedPassword },
+        );
+
+        // Delete used token
+        await resetToken.deleteOne();
+
+        apiSuccess(res, null, 'Password reset successful');
+    } catch (error) {
+        apiError(
+            res,
+            error instanceof Error ? error.message : 'Password reset failed',
+        );
+    }
+};
+
 // Get current logged-in user with relevant details
 export const getMe = async (
     req: Request,
@@ -236,7 +336,7 @@ export const getMe = async (
         ); // Exclude sensitive fields
 
         if (!user) {
-            apiError(res, 'User not found', 404);
+            apiNotFound(res, 'User not found');
             return;
         }
 
