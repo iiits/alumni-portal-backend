@@ -3,7 +3,9 @@ import {
     getMe,
     login,
     register,
+    requestPasswordReset,
     resendVerificationEmail,
+    resetPassword,
     verifyEmail,
 } from '../controllers/authController';
 import { protect, requireVerified } from '../middleware/auth';
@@ -29,5 +31,23 @@ router.post(
 
 // Verify email
 router.post('/verify-email', verificationLimiter, verifyEmail);
+
+// Request password reset
+router.post(
+    '/request-reset-password',
+    protect,
+    requireVerified,
+    verificationLimiter,
+    requestPasswordReset,
+);
+
+// Reset password
+router.post(
+    '/reset-password',
+    protect,
+    requireVerified,
+    verificationLimiter,
+    resetPassword,
+);
 
 export default router;
