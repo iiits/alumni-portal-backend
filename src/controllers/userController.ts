@@ -1,81 +1,150 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
-import { apiError, apiNotFound, apiSuccess } from '../utils/apiResponses';
+import {
+    apiError,
+    apiNotFound,
+    apiSuccess,
+    apiUnauthorized,
+} from '../utils/apiResponses';
 
-// Create a new user
-export const createUser = async (req: Request, res: Response) => {
+// Get all users (with filtered fields)
+export const getUsers = async (req: Request, res: Response): Promise<void> => {
     try {
-        const user = new User(req.body);
-        await user.save();
-        return apiSuccess(res, user, 'User created successfully', 201);
-    } catch (error) {
-        return apiError(
-            res,
-            error instanceof Error ? error.message : 'Failed to create user',
-            400,
-        );
-    }
-};
+        const users = await User.find()
+            .select('-password -verified -__v')
+            .sort({ createdAt: -1 });
 
-// Get all users
-export const getUsers = async (req: Request, res: Response) => {
-    try {
-        const users = await User.find();
-        return apiSuccess(res, users, 'Users retrieved successfully');
+        apiSuccess(res, users, 'Users retrieved successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
             error instanceof Error ? error.message : 'Failed to fetch users',
         );
     }
 };
 
-// Get a single user by ID
-export const getUserById = async (req: Request, res: Response) => {
+// Get self user profile
+export const getMyProfile = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
     try {
-        const user = await User.findById(req.params.id);
-        if (!user) {
-            return apiNotFound(res, 'User not found');
+        const userId = req.user?.id;
+
+        if (!userId) {
+            apiUnauthorized(res, 'Not authorized to access this profile');
+            return;
         }
-        return apiSuccess(res, user, 'User retrieved successfully');
+
+        const user = await User.findOne({ id: userId }).select(
+            '-_id -password -verified -__v',
+        );
+
+        if (!user) {
+            apiNotFound(res, 'User not found');
+            return;
+        }
+
+        apiSuccess(res, user, 'User retrieved successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
             error instanceof Error ? error.message : 'Failed to fetch user',
         );
     }
 };
 
-// Update a user by ID
-export const updateUser = async (req: Request, res: Response) => {
+// Get a single user by ID
+export const getUserById = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
     try {
-        const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true,
-        });
-        if (!user) {
-            return apiNotFound(res, 'User not found');
+        const userId = req.params.id;
+
+        if (!userId) {
+            apiError(res, 'User ID is required');
+            return;
         }
-        return apiSuccess(res, user, 'User updated successfully');
+
+        const user = await User.findOne({ id: userId }).select(
+            '-id -_id -userId -password -role -verified -__v',
+        );
+
+        if (!user) {
+            apiNotFound(res, 'User not found');
+            return;
+        }
+
+        apiSuccess(res, user, 'User retrieved successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
-            error instanceof Error ? error.message : 'Failed to update user',
-            400,
+            error instanceof Error ? error.message : 'Failed to fetch user',
         );
     }
 };
 
-// Delete a user by ID
-export const deleteUser = async (req: Request, res: Response) => {
+// Update user profile
+export const updateUser = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
     try {
-        const user = await User.findByIdAndDelete(req.params.id);
-        if (!user) {
-            return apiNotFound(res, 'User not found');
+        // Only allow users to update their own profile unless admin
+        if (req.user.id !== req.params.id && req.user.role !== 'admin') {
+            apiUnauthorized(res, 'Not authorized to update this profile');
+            return;
         }
-        return apiSuccess(res, null, 'User deleted successfully');
+
+        // Prevent updating sensitive fields
+        const { password, verified, role, ...updateData } = req.body;
+
+        const user = await User.findOneAndUpdate(
+            { id: req.params.id },
+            updateData,
+            {
+                new: true,
+                runValidators: true,
+            },
+        ).select('-password -verified -__v');
+
+        if (!user) {
+            apiNotFound(res, 'User not found');
+            return;
+        }
+
+        apiSuccess(res, user, 'User updated successfully');
     } catch (error) {
-        return apiError(
+        apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to update user',
+        );
+    }
+};
+
+// Delete user
+export const deleteUser = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
+    try {
+        // Only allow users to delete their own profile unless admin
+        if (req.user.id !== req.params.id && req.user.role !== 'admin') {
+            apiUnauthorized(res, 'Not authorized to delete this profile');
+            return;
+        }
+
+        const user = await User.findOneAndDelete({ id: req.params.id });
+
+        if (!user) {
+            apiNotFound(res, 'User not found');
+            return;
+        }
+
+        apiSuccess(res, null, 'User deleted successfully');
+    } catch (error) {
+        apiError(
             res,
             error instanceof Error ? error.message : 'Failed to delete user',
         );
