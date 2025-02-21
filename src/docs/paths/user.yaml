@@ -1,0 +1,192 @@
+paths:
+    /users:
+        get:
+            tags:
+                - Users
+            summary: Get all users
+            description: Admin only - retrieve all users with filtered fields
+            security:
+                - bearerAuth: []
+            responses:
+                200:
+                    description: Users retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/User'
+                                    message:
+                                        type: string
+                                        example: 'Users retrieved successfully'
+                401:
+                    description: Not authorized
+                403:
+                    description: Email not verified or insufficient role
+                500:
+                    description: Server error
+
+    /users/me:
+        get:
+            tags:
+                - Users
+            summary: Get current user profile
+            description: Get the profile of the currently logged-in user
+            security:
+                - bearerAuth: []
+            responses:
+                200:
+                    description: Current user profile retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        $ref: '#/components/schemas/User'
+                                    message:
+                                        type: string
+                                        example: 'Current user profile retrieved successfully'
+                401:
+                    description: Not authorized
+                403:
+                    description: Email not verified
+                500:
+                    description: Server error
+
+    /users/{id}:
+        get:
+            tags:
+                - Users
+            summary: Get user by ID
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                  description: User ID
+            responses:
+                200:
+                    description: User retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        $ref: '#/components/schemas/User'
+                                    message:
+                                        type: string
+                                        example: 'User retrieved successfully'
+                401:
+                    description: Not authorized
+                403:
+                    description: Email not verified or insufficient role
+                404:
+                    description: User not found
+                500:
+                    description: Server error
+
+        put:
+            tags:
+                - Users
+            summary: Update user
+            description: Users can update their own profile, admins can update any profile
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                  description: User ID
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/User'
+            responses:
+                200:
+                    description: User updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        $ref: '#/components/schemas/User'
+                                    message:
+                                        type: string
+                                        example: 'User updated successfully'
+                401:
+                    description: Not authorized
+                403:
+                    description: Email not verified or insufficient role
+                404:
+                    description: User not found
+                500:
+                    description: Server error
+
+        delete:
+            tags:
+                - Users
+            summary: Delete user
+            description: Admin only - delete a user
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                  description: User ID
+            responses:
+                200:
+                    description: User deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    message:
+                                        type: string
+                                        example: 'User deleted successfully'
+                401:
+                    description: Not authorized
+                403:
+                    description: Email not verified or insufficient role
+                404:
+                    description: User not found
+                500:
+                    description: Server error
+
+components:
+    securitySchemes:
+        bearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
