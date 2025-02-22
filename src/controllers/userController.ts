@@ -1,3 +1,4 @@
+import AlumniDetails from '@/models/AlumniDetails';
 import { Request, Response } from 'express';
 import User from '../models/User';
 import {
@@ -135,11 +136,21 @@ export const deleteUser = async (
             return;
         }
 
+        const alumniId = await User.findOne({ id: req.params.id }).transform(
+            user => user?.alumniDetails,
+        );
+
         const user = await User.findOneAndDelete({ id: req.params.id });
 
         if (!user) {
             apiNotFound(res, 'User not found');
             return;
+        }
+
+        if (alumniId) {
+            await AlumniDetails.findOneAndDelete({
+                id: alumniId,
+            });
         }
 
         apiSuccess(res, null, 'User deleted successfully');
