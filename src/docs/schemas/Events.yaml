@@ -1,0 +1,50 @@
+components:
+    schemas:
+        Event:
+            type: object
+            required:
+                - name
+                - dateTime
+                - venue
+                - description
+                - content
+                - type
+            properties:
+                name:
+                    type: string
+                    description: Event name
+                dateTime:
+                    type: string
+                    format: date-time
+                    description: Event start date and time
+                endDateTime:
+                    type: string
+                    format: date-time
+                    description: Event end date and time
+                venue:
+                    type: string
+                    description: Event location/venue
+                description:
+                    type: string
+                    description: Brief event description
+                content:
+                    type: object
+                    properties:
+                        title:
+                            type: string
+                            description: Content title
+                        description:
+                            type: string
+                            description: Detailed content description
+                imageUrl:
+                    type: string
+                    description: URL to event image
+                links:
+                    type: array
+                    items:
+                        type: string
+                    description: Related links
+                type:
+                    type: string
+                    enum: [alumni, college, club, others]
+                    description: Event category
