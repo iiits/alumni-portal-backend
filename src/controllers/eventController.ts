@@ -2,80 +2,129 @@ import { Request, Response } from 'express';
 import Event from '../models/Event';
 import { apiError, apiNotFound, apiSuccess } from '../utils/apiResponses';
 
-// Create a new event
-export const createEvent = async (req: Request, res: Response) => {
+// Get events with year filter
+export const getFilteredEvents = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
     try {
-        const event = new Event(req.body);
-        await event.save();
-        return apiSuccess(res, event, 'Event created successfully', 201);
-    } catch (error) {
-        return apiError(
-            res,
-            error instanceof Error ? error.message : 'Failed to create event',
-            400,
-        );
-    }
-};
+        const { year } = req.query;
+        const requestedYear = req.query.year
+            ? parseInt(year as string)
+            : new Date().getFullYear();
 
-// Get all events
-export const getEvents = async (req: Request, res: Response) => {
-    try {
-        const events = await Event.find();
-        return apiSuccess(res, events, 'Events retrieved successfully');
+        if (isNaN(requestedYear)) {
+            apiError(res, 'Invalid year provided');
+            return;
+        }
+
+        const startDate = new Date(requestedYear, 0, 1);
+        const endDate = new Date(requestedYear, 11, 31, 23, 59, 59);
+
+        const events = await Event.find({
+            dateTime: {
+                $gte: startDate,
+                $lte: endDate,
+            },
+        })
+            .sort({ dateTime: 1 })
+            .select('-__v');
+
+        apiSuccess(res, events, 'Events retrieved successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
             error instanceof Error ? error.message : 'Failed to fetch events',
         );
     }
 };
 
-// Get a single event by ID
-export const getEventById = async (req: Request, res: Response) => {
+// Get all events
+export const getEvents = async (req: Request, res: Response): Promise<void> => {
     try {
-        const event = await Event.findById(req.params.id);
-        if (!event) {
-            return apiNotFound(res, 'Event not found');
-        }
-        return apiSuccess(res, event, 'Event retrieved successfully');
+        const events = await Event.find().sort({ dateTime: 1 }).select('-__v');
+        apiSuccess(res, events, 'Events retrieved successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
-            error instanceof Error ? error.message : 'Failed to fetch event',
+            error instanceof Error ? error.message : 'Failed to fetch events',
         );
     }
 };
 
-// Update an event by ID
-export const updateEvent = async (req: Request, res: Response) => {
+// Create event
+export const createEvent = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
     try {
-        const event = await Event.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true,
+        const existingEvent = await Event.findOne({
+            name: req.body.name,
+            dateTime: new Date(req.body.dateTime),
         });
-        if (!event) {
-            return apiNotFound(res, 'Event not found');
+
+        if (existingEvent) {
+            apiError(res, 'Event already exists');
+            return;
         }
-        return apiSuccess(res, event, 'Event updated successfully');
+
+        const event = new Event({
+            ...req.body,
+            postedBy: req.user.id,
+        });
+
+        await event.save();
+        apiSuccess(res, event, 'Event created successfully');
     } catch (error) {
-        return apiError(
+        apiError(
+            res,
+            error instanceof Error ? error.message : 'Failed to create event',
+        );
+    }
+};
+
+// Update event
+export const updateEvent = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
+    try {
+        const event = await Event.findOneAndUpdate(
+            { id: req.params.id },
+            req.body,
+            { new: true, runValidators: true },
+        ).select('-__v');
+
+        if (!event) {
+            apiNotFound(res, 'Event not found');
+            return;
+        }
+
+        apiSuccess(res, event, 'Event updated successfully');
+    } catch (error) {
+        apiError(
             res,
             error instanceof Error ? error.message : 'Failed to update event',
-            400,
         );
     }
 };
 
-// Delete an event by ID
-export const deleteEvent = async (req: Request, res: Response) => {
+// Delete event
+export const deleteEvent = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
     try {
-        const event = await Event.findByIdAndDelete(req.params.id);
+        const event = await Event.findOneAndDelete({ id: req.params.id });
+
         if (!event) {
-            return apiNotFound(res, 'Event not found');
+            apiNotFound(res, 'Event not found');
+            return;
         }
-        return apiSuccess(res, null, 'Event deleted successfully');
+
+        apiSuccess(res, null, 'Event deleted successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
             error instanceof Error ? error.message : 'Failed to delete event',
         );
