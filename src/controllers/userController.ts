@@ -1,5 +1,5 @@
-import AlumniDetails from '@/models/AlumniDetails';
 import { Request, Response } from 'express';
+import AlumniDetails from '../models/AlumniDetails';
 import User from '../models/User';
 import {
     apiError,

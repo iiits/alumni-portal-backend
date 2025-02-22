@@ -4,7 +4,12 @@ export interface IAlumniDetails extends Document {
     id: string;
     jobPosition: {
         title: string;
-        type: 'full-time' | 'part-time' | 'freelancer' | 'intern' | 'entrepreneur';
+        type:
+            | 'full-time'
+            | 'part-time'
+            | 'freelancer'
+            | 'intern'
+            | 'entrepreneur';
         start: Date;
         end?: Date | null;
         ongoing: boolean;
@@ -31,13 +36,24 @@ export interface IAlumniDetails extends Document {
 }
 
 const AlumniDetailsSchema = new mongoose.Schema<IAlumniDetails>({
-    id: { type: String, default: () => crypto.randomUUID(), unique: true },
+    id: {
+        type: String,
+        default: () => crypto.randomUUID(),
+        unique: true,
+        index: true,
+    },
     jobPosition: [
         {
             title: { type: String, required: true },
             type: {
                 type: String,
-                enum: ['full-time', 'part-time', 'freelancer', 'intern', 'entrepreneur'],
+                enum: [
+                    'full-time',
+                    'part-time',
+                    'freelancer',
+                    'intern',
+                    'entrepreneur',
+                ],
                 required: true,
             },
             start: { type: Date, required: true },
@@ -72,4 +88,9 @@ const AlumniDetailsSchema = new mongoose.Schema<IAlumniDetails>({
     verified: { type: Boolean, default: false },
 });
 
-export default mongoose.model<IAlumniDetails>('AlumniDetails', AlumniDetailsSchema);
+AlumniDetailsSchema.index({ id: 1, verified: 1 });
+
+export default mongoose.model<IAlumniDetails>(
+    'AlumniDetails',
+    AlumniDetailsSchema,
+);
