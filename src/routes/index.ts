@@ -3,6 +3,7 @@ import alumniDetailsRoutes from './alumniDetails';
 import authRoutes from './auth';
 import contactRoutes from './contact';
 import eventRoutes from './event';
+import referralRoutes from './referral';
 import userRoutes from './user';
 
 const router = express.Router();
@@ -19,5 +20,7 @@ router.use('/alumni-details', alumniDetailsRoutes);
 
 router.use('/contactus', contactRoutes);
 router.use('/events', eventRoutes);
+
+router.use('/referrals', referralRoutes);
 
 export default router;
