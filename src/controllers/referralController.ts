@@ -1,47 +1,55 @@
 import { Request, Response } from 'express';
 import Referral from '../models/Referral';
-import { apiError, apiNotFound, apiSuccess } from '../utils/apiResponses';
+import {
+    apiError,
+    apiNotFound,
+    apiSuccess,
+    apiUnauthorized,
+} from '../utils/apiResponses';
 
-export const createReferral = async (req: Request, res: Response) => {
+// Create referral
+export const createReferral = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
     try {
-        const {
-            isActive,
-            noOfReferrals,
-            jobTitle,
-            description,
-            link,
-            postedBy,
-        } = req.body;
+        const userId = req.user?.id;
+
         const referral = new Referral({
-            isActive,
-            noOfReferrals,
-            jobTitle,
-            description,
-            link,
-            postedBy,
+            ...req.body,
+            postedBy: userId,
         });
         await referral.save();
-        return apiSuccess(res, referral, 'Referral created successfully', 201);
+        apiSuccess(res, referral, 'Referral created successfully', 201);
     } catch (error) {
-        return apiError(
+        apiError(
             res,
             error instanceof Error
                 ? error.message
                 : 'Failed to create referral',
-            400,
         );
     }
 };
 
-export const getReferrals = async (req: Request, res: Response) => {
+// Get all referrals
+export const getReferrals = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
     try {
-        const referrals = await Referral.find().populate(
-            'postedBy',
-            'name email',
-        );
-        return apiSuccess(res, referrals, 'Referrals retrieved successfully');
+        const referrals = await Referral.find()
+            .populate({
+                path: 'postedBy',
+                model: 'User',
+                localField: 'postedBy',
+                foreignField: 'id',
+                select: 'id name collegeEmail personalEmail',
+            })
+            .sort({ lastApplyDate: -1 });
+
+        apiSuccess(res, referrals, 'Referrals retrieved successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
             error instanceof Error
                 ? error.message
@@ -50,57 +58,186 @@ export const getReferrals = async (req: Request, res: Response) => {
     }
 };
 
-export const getReferralById = async (req: Request, res: Response) => {
+// Get all referrals with filters
+export const getFilteredReferrals = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
     try {
-        const referral = await Referral.findOne({ id: req.params.id }).populate(
-            'postedBy',
-            'name email',
-        );
-        if (!referral) {
-            return apiNotFound(res, 'Referral not found');
+        const { month, year } = req.query;
+        let query: {
+            $or?: Array<{
+                lastApplyDate?: { $gte: Date; $lte: Date };
+                postedOn?: { $gte: Date; $lte: Date };
+            }>;
+            lastApplyDate?: { $gte: Date };
+        } = {};
+
+        console.log(month, year);
+
+        // Validate month and year if provided
+        if (month && year) {
+            const monthNum = parseInt(month as string);
+            const yearNum = parseInt(year as string);
+
+            if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+                throw new Error('Invalid month. Must be between 1 and 12');
+            }
+
+            if (isNaN(yearNum) || yearNum < 2000 || yearNum > 2100) {
+                throw new Error('Invalid year');
+            }
+
+            const startDate = new Date(yearNum, monthNum - 1, 1);
+            const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59);
+
+            query = {
+                $or: [
+                    {
+                        lastApplyDate: {
+                            $gte: startDate,
+                            $lte: endDate,
+                        },
+                    },
+                    {
+                        postedOn: {
+                            $gte: startDate,
+                            $lte: endDate,
+                        },
+                    },
+                ],
+            };
+        } else {
+            // Default: Show upcoming referrals
+            query = {
+                lastApplyDate: { $gte: new Date() },
+            };
         }
-        return apiSuccess(res, referral, 'Referral retrieved successfully');
+
+        console.log(query);
+
+        const referrals = await Referral.find(query)
+            .populate({
+                path: 'postedBy',
+                model: 'User',
+                localField: 'postedBy',
+                foreignField: 'id',
+                select: 'id name collegeEmail personalEmail',
+            })
+            .sort({ lastApplyDate: -1 });
+
+        apiSuccess(res, referrals, 'Referrals retrieved successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
-            error instanceof Error ? error.message : 'Failed to fetch referral',
+            error instanceof Error
+                ? error.message
+                : 'Failed to fetch referrals',
         );
     }
 };
 
-export const updateReferral = async (req: Request, res: Response) => {
+// Get user's referrals
+export const getUserReferrals = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
     try {
-        const { isActive, noOfReferrals, jobTitle, description, link } =
-            req.body;
-        const referral = await Referral.findOneAndUpdate(
-            { id: req.params.id },
-            { isActive, noOfReferrals, jobTitle, description, link },
-            { new: true },
-        );
-        if (!referral) {
-            return apiNotFound(res, 'Referral not found');
+        const userId = req.user?.id;
+        const requestedUserId = req.params.userId;
+
+        // Check if user is requesting their own referrals or is admin
+        if (userId !== requestedUserId && req.user?.role !== 'admin') {
+            apiUnauthorized(
+                res,
+                "You are not authorized to view this user's referrals",
+            );
+            return;
         }
-        return apiSuccess(res, referral, 'Referral updated successfully');
+
+        const referrals = await Referral.find({ postedBy: requestedUserId })
+            .populate({
+                path: 'postedBy',
+                model: 'User',
+                localField: 'postedBy',
+                foreignField: 'id',
+                select: 'id name collegeEmail personalEmail',
+            })
+            .sort({ lastApplyDate: -1 });
+
+        apiSuccess(res, referrals, 'User referrals retrieved successfully');
     } catch (error) {
-        return apiError(
+        apiError(
+            res,
+            error instanceof Error
+                ? error.message
+                : 'Failed to fetch user referrals',
+        );
+    }
+};
+
+// Update referral
+export const updateReferral = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
+    try {
+        const referral = await Referral.findOneAndUpdate(
+            {
+                id: req.params.id,
+                $or: [
+                    { postedBy: req.user.id },
+                    { $expr: { $eq: [req.user.role, 'admin'] } },
+                ],
+            },
+            req.body,
+            { new: true, runValidators: true },
+        ).populate({
+            path: 'postedBy',
+            model: 'User',
+            localField: 'postedBy',
+            foreignField: 'id',
+            select: 'id name collegeEmail personalEmail',
+        });
+
+        if (!referral) {
+            apiNotFound(res, 'Referral not found or unauthorized');
+            return;
+        }
+
+        apiSuccess(res, referral, 'Referral updated successfully');
+    } catch (error) {
+        apiError(
             res,
             error instanceof Error
                 ? error.message
                 : 'Failed to update referral',
-            400,
         );
     }
 };
 
-export const deleteReferral = async (req: Request, res: Response) => {
+// Delete referral
+export const deleteReferral = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
     try {
-        const referral = await Referral.findOneAndDelete({ id: req.params.id });
+        const referral = await Referral.findOneAndDelete({
+            id: req.params.id,
+            $or: [
+                { postedBy: req.user.id },
+                { $expr: { $eq: [req.user.role, 'admin'] } },
+            ],
+        });
+
         if (!referral) {
-            return apiNotFound(res, 'Referral not found');
+            apiNotFound(res, 'Referral not found or unauthorized');
+            return;
         }
-        return apiSuccess(res, null, 'Referral deleted successfully');
+
+        apiSuccess(res, null, 'Referral deleted successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
             error instanceof Error
                 ? error.message

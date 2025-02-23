@@ -1,0 +1,151 @@
+paths:
+    /referrals:
+        get:
+            tags:
+                - Referrals
+            summary: Get all referrals
+            security:
+                - bearerAuth: []
+            responses:
+                200:
+                    description: Referrals retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/JobReferral'
+                401:
+                    description: Not authorized
+
+        post:
+            tags:
+                - Referrals
+            summary: Create new referral
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/JobReferral'
+            responses:
+                201:
+                    description: Referral created successfully
+                401:
+                    description: Not authorized
+                403:
+                    description: Insufficient permissions
+
+    /referrals/filter:
+        get:
+            tags:
+                - Referrals
+            summary: Get all referrals with filtering by month and year
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: query
+                  name: month
+                  schema:
+                      type: integer
+                  description: Month number (1-12)
+                - in: query
+                  name: year
+                  schema:
+                      type: integer
+                  description: Year (YYYY)
+            responses:
+                200:
+                    description: Referrals retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/JobReferral'
+                401:
+                    description: Not authorized
+
+    /referrals/user/{userId}:
+        get:
+            tags:
+                - Referrals
+            summary: Get user's referrals
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: userId
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: User referrals retrieved successfully
+                401:
+                    description: Not authorized
+                403:
+                    description: Insufficient permissions
+
+    /referrals/{id}:
+        put:
+            tags:
+                - Referrals
+            summary: Update referral
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/JobReferral'
+            responses:
+                200:
+                    description: Referral updated successfully
+                401:
+                    description: Not authorized
+                403:
+                    description: Insufficient permissions
+                404:
+                    description: Referral not found
+
+        delete:
+            tags:
+                - Referrals
+            summary: Delete referral
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Referral deleted successfully
+                401:
+                    description: Not authorized
+                403:
+                    description: Insufficient permissions
+                404:
+                    description: Referral not found
