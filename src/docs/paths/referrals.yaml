@@ -149,3 +149,153 @@ paths:
                     description: Insufficient permissions
                 404:
                     description: Referral not found
+
+    /referrals/submissions/{referralId}:
+        get:
+            tags:
+                - Referral Submissions
+            summary: Get all submissions for a specific referral
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: referralId
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Submissions retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/JobReferralSubmission'
+                401:
+                    description: Not authorized
+                403:
+                    description: Insufficient permissions
+                404:
+                    description: Referral not found
+
+    /referrals/submissions/user:
+        get:
+            tags:
+                - Referral Submissions
+            summary: Get user's submissions
+            security:
+                - bearerAuth: []
+            responses:
+                200:
+                    description: User submissions retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/JobReferralSubmission'
+                401:
+                    description: Not authorized
+                403:
+                    description: Insufficient permissions
+
+    /referrals/submissions:
+        post:
+            tags:
+                - Referral Submissions
+            summary: Create new submission
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/JobReferralSubmission'
+            responses:
+                201:
+                    description: Submission created successfully
+                401:
+                    description: Not authorized
+                403:
+                    description: Insufficient permissions
+                404:
+                    description: Referral not found
+
+    /referrals/submissions/{id}/status:
+        put:
+            tags:
+                - Referral Submissions
+            summary: Update submission status
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - status
+                            properties:
+                                status:
+                                    type: string
+                                    enum: [pending, accepted, rejected]
+            responses:
+                200:
+                    description: Submission status updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    data:
+                                        $ref: '#/components/schemas/JobReferralSubmission'
+                401:
+                    description: Not authorized
+                403:
+                    description: Insufficient permissions
+                404:
+                    description: Submission not found
+
+    /referrals/submissions/{id}:
+        delete:
+            tags:
+                - Referral Submissions
+            summary: Delete submission (Admin only)
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Submission deleted successfully
+                401:
+                    description: Not authorized
+                403:
+                    description: Insufficient permissions
+                404:
+                    description: Submission not found
