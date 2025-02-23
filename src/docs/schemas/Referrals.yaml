@@ -44,3 +44,43 @@ components:
                 lastApplyDate:
                     type: string
                     format: date-time
+
+        JobReferralSubmission:
+            type: object
+            required:
+                - referralId
+                - resumeLink
+                - whyReferMe
+            properties:
+                id:
+                    type: string
+                    description: Unique identifier
+                    readOnly: true
+                referralId:
+                    type: string
+                    description: Reference to JobReferral ID
+                userId:
+                    type: string
+                    description: Reference to User ID
+                    readOnly: true
+                resumeLink:
+                    type: string
+                    pattern: '^https?:\/\/\S+$'
+                    description: URL to the resume
+                coverLetter:
+                    type: string
+                    maxLength: 2000
+                    description: Optional cover letter
+                whyReferMe:
+                    type: string
+                    maxLength: 1000
+                    description: Explanation for referral request
+                status:
+                    type: string
+                    enum: [pending, accepted, rejected]
+                    default: pending
+                    readOnly: true
+                submittedAt:
+                    type: string
+                    format: date-time
+                    readOnly: true
