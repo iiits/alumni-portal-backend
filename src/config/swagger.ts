@@ -12,7 +12,7 @@ const options = {
         servers: [
             {
                 url: process.env.SWAGGER_SERVER_URL,
-                description: 'Development server',
+                description: `${process.env.NODE_ENV} server`,
             },
         ],
         components: {

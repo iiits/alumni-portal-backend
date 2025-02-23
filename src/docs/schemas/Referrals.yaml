@@ -1,0 +1,46 @@
+components:
+    schemas:
+        JobReferral:
+            type: object
+            required:
+                - jobDetails
+                - lastApplyDate
+            properties:
+                id:
+                    type: string
+                    description: Unique identifier
+                    readOnly: true
+                isActive:
+                    type: boolean
+                    default: true
+                numberOfReferrals:
+                    type: integer
+                    minimum: 0
+                    default: 0
+                jobDetails:
+                    type: object
+                    properties:
+                        title:
+                            type: string
+                            maxLength: 100
+                        description:
+                            type: string
+                            maxLength: 2000
+                        company:
+                            type: string
+                        role:
+                            type: string
+                        link:
+                            type: string
+                            pattern: '^https?:\/\/\S+$'
+                postedBy:
+                    type: string
+                    description: Reference to User ID
+                    readOnly: true
+                postedOn:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                lastApplyDate:
+                    type: string
+                    format: date-time
