@@ -36,7 +36,12 @@ export interface IUser extends Document {
 }
 
 const UserSchema = new mongoose.Schema<IUser>({
-    id: { type: String, default: () => crypto.randomUUID(), unique: true },
+    id: {
+        type: String,
+        default: () => crypto.randomUUID(),
+        unique: true,
+        index: true,
+    },
     name: { type: String, required: true, trim: true },
     collegeEmail: { type: String, required: true, unique: true },
     personalEmail: { type: String, unique: true, required: true },
@@ -87,6 +92,9 @@ const UserSchema = new mongoose.Schema<IUser>({
         default: false,
     },
 });
+
+// Compound index for auth lookups
+UserSchema.index({ collegeEmail: 1, userId: 1 });
 
 // Encrypt password using bcrypt
 UserSchema.pre('save', async function (next) {
