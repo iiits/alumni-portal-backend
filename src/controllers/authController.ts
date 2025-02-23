@@ -14,11 +14,12 @@ import {
     apiSuccess,
     apiUnauthorized,
 } from '../utils/apiResponses';
-
-// Regex patterns to determine the type of input
-const collegeEmailPattern = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*@iiits\.in$/;
-const personalEmailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-const userIdPattern = /^[AS]\d{4}00[123]\d{4}$/;
+import {
+    collegeEmailPattern,
+    personalEmailPattern,
+    userIdPattern,
+    validateRegistration,
+} from './helpers/authHelper';
 
 // Register user
 export const register = async (
@@ -27,6 +28,31 @@ export const register = async (
     next: NextFunction,
 ): Promise<void> => {
     try {
+        validateRegistration(req.body);
+
+        const existingUser = await User.findOne({
+            $or: [
+                { collegeEmail: req.body.collegeEmail },
+                { personalEmail: req.body.personalEmail },
+                { userId: req.body.userId },
+            ],
+        });
+
+        if (existingUser) {
+            if (existingUser.collegeEmail === req.body.collegeEmail) {
+                apiError(res, 'College email already registered', 400);
+                return;
+            }
+            if (existingUser.personalEmail === req.body.personalEmail) {
+                apiError(res, 'Personal email already registered', 400);
+                return;
+            }
+            if (existingUser.userId === req.body.userId) {
+                apiError(res, 'User ID already registered', 400);
+                return;
+            }
+        }
+
         const user = await User.create({
             ...req.body,
             verified: false,
