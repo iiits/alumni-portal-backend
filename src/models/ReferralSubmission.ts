@@ -9,6 +9,7 @@ export interface IReferralSubmission extends Document {
     whyReferMe: string;
     status: 'pending' | 'accepted' | 'rejected';
     submittedAt: Date;
+    expiresAt: Date;
 }
 
 const ReferralSubmissionSchema = new mongoose.Schema(
@@ -57,11 +58,38 @@ const ReferralSubmissionSchema = new mongoose.Schema(
             type: Date,
             default: Date.now,
         },
+        expiresAt: {
+            type: Date,
+            index: { expires: 0 }, // Create a TTL index
+        },
     },
     {
         timestamps: true,
     },
 );
+
+// Pre-save middleware to set expiration date
+ReferralSubmissionSchema.pre('save', async function (next) {
+    if (this.isNew) {
+        try {
+            const referral = await mongoose
+                .model('JobReferral')
+                .findOne({ id: this.referralId });
+            if (referral) {
+                // Set expiration date to 30 days after the referral's lastApplyDate
+                const DAYS_TO_KEEP_AFTER_DEADLINE = 30;
+                const expirationDate = new Date(referral.lastApplyDate);
+                expirationDate.setDate(
+                    expirationDate.getDate() + DAYS_TO_KEEP_AFTER_DEADLINE,
+                );
+                this.expiresAt = expirationDate;
+            }
+        } catch (error: any) {
+            next(error as Error);
+        }
+    }
+    next();
+});
 
 export default mongoose.model<IReferralSubmission>(
     'JobReferralSubmission',

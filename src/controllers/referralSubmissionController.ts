@@ -31,22 +31,13 @@ export const getReferralSubmissions = async (
         const submissions = await ReferralSubmission.find({
             referralId: req.params.referralId,
         })
-            .populate([
-                {
-                    path: 'userId',
-                    model: 'User',
-                    localField: 'userId',
-                    foreignField: 'id',
-                    select: 'id name collegeEmail personalEmail',
-                },
-                {
-                    path: 'referralId',
-                    model: 'JobReferral',
-                    localField: 'referralId',
-                    foreignField: 'id',
-                    select: 'id isActive numberOfReferrals jobDetails postedBy postedOn lastApplyDate -_id',
-                },
-            ])
+            .populate({
+                path: 'userId',
+                model: 'User',
+                localField: 'userId',
+                foreignField: 'id',
+                select: 'id name collegeEmail personalEmail',
+            })
             .sort({ submittedAt: -1 });
 
         apiSuccess(res, submissions, 'Submissions retrieved successfully');
