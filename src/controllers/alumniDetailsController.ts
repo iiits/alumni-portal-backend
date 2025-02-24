@@ -12,7 +12,7 @@ export const createAlumniDetails = async (
 ): Promise<void> => {
     try {
         const userId = req.user?.id;
-        const { jobPosition, education, name, ...rest } = req.body;
+        const { jobPosition, education,...rest } = req.body;
 
         const formattedJobPosition = jobPosition.map((job: any) => ({
             ...job,
@@ -29,6 +29,7 @@ export const createAlumniDetails = async (
             apiNotFound(res, 'User not found');
             return;
         }
+        const { name } = user;
 
         const createdAlumni = await AlumniDetails.create({
             ...rest,
