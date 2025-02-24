@@ -124,6 +124,9 @@ export const getFilteredReferrals = async (
                 foreignField: 'id',
                 select: 'id name collegeEmail personalEmail',
             })
+            .select(
+                'id isActive numberOfReferrals jobDetails postedBy postedOn lastApplyDate -_id',
+            )
             .sort({ lastApplyDate: -1 });
 
         apiSuccess(res, referrals, 'Referrals retrieved successfully');
