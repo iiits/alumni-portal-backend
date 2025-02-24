@@ -37,9 +37,15 @@ export const getMyProfile = async (
             return;
         }
 
-        const user = await User.findOne({ id: userId }).select(
-            '-_id -password -verified -__v',
-        );
+        const user = await User.findOne({ id: userId })
+            .select('-_id -password -verified -__v')
+            .populate({
+                path: 'alumniDetails',
+                model: 'AlumniDetails',
+                localField: 'alumniDetails',
+                foreignField: 'id',
+                select: '-_id -__v',
+            });
 
         if (!user) {
             apiNotFound(res, 'User not found');
@@ -68,9 +74,16 @@ export const getUserById = async (
             return;
         }
 
-        const user = await User.findOne({ id: userId }).select(
-            '-id -_id -userId -password -role -verified -__v',
-        );
+        const user = await User.findOne({ id: userId })
+            .select('-id -_id -userId -password -role -verified -__v')
+            .populate({
+                path: 'alumniDetails',
+                model: 'AlumniDetails',
+                match: { verified: true },
+                localField: 'alumniDetails',
+                foreignField: 'id',
+                select: '-_id -__v',
+            });
 
         if (!user) {
             apiNotFound(res, 'User not found');

@@ -15,7 +15,7 @@ router.get(
     '/',
     protect,
     requireVerified,
-    requireRole(UserRole.STUDENT),
+    requireRole(UserRole.ADMIN),
     getEvents,
 );
 
