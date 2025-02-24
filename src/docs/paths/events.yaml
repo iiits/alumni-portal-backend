@@ -62,6 +62,11 @@ paths:
                   schema:
                       type: integer
                   description: Year to filter events (defaults to current year)
+                - in: query
+                  name: type
+                  schema:
+                      type: string
+                  description: Type of event to filter (defaults to all)
             responses:
                 200:
                     description: Events retrieved successfully
