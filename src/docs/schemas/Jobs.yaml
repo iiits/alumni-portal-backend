@@ -1,0 +1,69 @@
+components:
+    schemas:
+        JobPosting:
+            type: object
+            required:
+                - jobName
+                - company
+                - role
+                - eligibility
+                - description
+                - type
+                - stipend
+                - duration
+                - workType
+                - links
+                - lastApplyDate
+            properties:
+                id:
+                    type: string
+                    description: Unique identifier
+                    readOnly: true
+                jobName:
+                    type: string
+                    maxLength: 100
+                company:
+                    type: string
+                role:
+                    type: string
+                eligibility:
+                    type: object
+                    properties:
+                        batch:
+                            type: array
+                            items:
+                                type: string
+                            description: Array of eligible batches
+                        requirements:
+                            type: array
+                            items:
+                                type: string
+                description:
+                    type: string
+                    maxLength: 2000
+                type:
+                    type: string
+                    enum: [fulltime, parttime, internship, others]
+                stipend:
+                    type: string
+                duration:
+                    type: string
+                workType:
+                    type: string
+                    enum: [onsite, remote, hybrid]
+                links:
+                    type: array
+                    items:
+                        type: string
+                        pattern: '^https?:\/\/\S+$'
+                postedBy:
+                    type: string
+                    description: Reference to User ID
+                    readOnly: true
+                postedOn:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                lastApplyDate:
+                    type: string
+                    format: date-time
