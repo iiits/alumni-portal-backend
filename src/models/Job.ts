@@ -1,100 +1,124 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 
-export interface IJob extends Document {
+export interface IJobPosting extends Document {
     id: string;
-    name: string;
+    jobName: string;
     company: string;
-    jobTitle: string;
-    eligibility: string;
+    role: string;
+    eligibility: {
+        batch: string[];
+        requirements: string[];
+    };
     description: string;
-    type: 'full-time' | 'part-time' | 'intern' | 'freelancer';
-    stipend?: string;
-    duration?: string;
-    workType: 'on-site' | 'remote' | 'hybrid';
+    type: 'fulltime' | 'parttime' | 'internship' | 'others';
+    stipend: string;
+    duration: string;
+    workType: 'onsite' | 'remote' | 'hybrid';
     links: string[];
-    postedBy: String;
-    createdAt: Date;
+    postedBy: string;
+    postedOn: Date;
+    lastApplyDate: Date;
 }
 
-const JobSchema: Schema = new mongoose.Schema(
+const JobPostingSchema = new mongoose.Schema(
     {
         id: {
             type: String,
-            required: true,
+            default: () => crypto.randomUUID(),
             unique: true,
+            index: true,
         },
-        name: {
+        jobName: {
             type: String,
-            required: [true, 'Please add a name'],
+            required: [true, 'Job name is required'],
             trim: true,
-            maxlength: [100, 'Name cannot be more than 100 characters'],
+            maxlength: [100, 'Job name cannot exceed 100 characters'],
         },
         company: {
             type: String,
-            required: [true, 'Please add a company name'],
+            required: [true, 'Company name is required'],
             trim: true,
-            maxlength: [100, 'Company name cannot be more than 100 characters'],
         },
-        jobTitle: {
+        role: {
             type: String,
-            required: [true, 'Please add a job title'],
+            required: [true, 'Job role is required'],
             trim: true,
-            maxlength: [100, 'Job title cannot be more than 100 characters'],
         },
         eligibility: {
-            type: String,
-            required: [true, 'Please add eligibility criteria'],
-            maxlength: [
-                500,
-                'Eligibility criteria cannot be more than 500 characters',
+            batch: [
+                {
+                    type: String,
+                    required: [true, 'Atleast one batch is required'],
+                    trim: true,
+                },
+            ],
+            requirements: [
+                {
+                    type: String,
+                    trim: true,
+                },
             ],
         },
         description: {
             type: String,
-            required: [true, 'Please add a job description'],
-            maxlength: [
-                1000,
-                'Description cannot be more than 1000 characters',
-            ],
+            required: [true, 'Job description is required'],
+            maxlength: [2000, 'Description cannot exceed 2000 characters'],
         },
         type: {
             type: String,
-            enum: ['full-time', 'part-time', 'intern', 'freelancer'],
-            required: true,
+            required: [true, 'Job type is required'],
+            enum: ['fulltime', 'parttime', 'internship', 'others'],
         },
         stipend: {
             type: String,
-            maxlength: [50, 'Stipend info cannot be more than 50 characters'],
+            required: [true, 'Stipend/Salary information is required'],
+            trim: true,
         },
         duration: {
             type: String,
-            maxlength: [50, 'Duration info cannot be more than 50 characters'],
+            required: true,
+            trim: true,
         },
         workType: {
             type: String,
-            enum: ['on-site', 'remote', 'hybrid'],
-            required: true,
+            required: [true, 'Work type is required'],
+            enum: ['onsite', 'remote', 'hybrid'],
         },
-        links: {
-            type: [String],
-            validate: {
-                validator: function (arr: string[]) {
-                    return arr.every(link => /^https?:\/\/\S+$/.test(link));
+        links: [
+            {
+                type: String,
+                validate: {
+                    validator: (value: string) =>
+                        /^https?:\/\/\S+$/.test(value),
+                    message: 'Please provide valid URLs',
                 },
-                message: 'Each link must be a valid URL',
             },
-        },
+        ],
         postedBy: {
             type: String,
             ref: 'User',
             required: true,
         },
-        createdAt: {
+        postedOn: {
             type: Date,
             default: Date.now,
         },
+        lastApplyDate: {
+            type: Date,
+            required: [true, 'Last apply date is required'],
+            validate: {
+                validator: function (this: IJobPosting, value: Date) {
+                    return value > this.postedOn;
+                },
+                message: 'Last apply date must be after posted date',
+            },
+        },
     },
-    { timestamps: true },
+    {
+        timestamps: true,
+    },
 );
 
-export default mongoose.model<IJob>('Job', JobSchema);
+JobPostingSchema.index({ lastApplyDate: 1 });
+
+export default mongoose.model<IJobPosting>('JobPosting', JobPostingSchema);

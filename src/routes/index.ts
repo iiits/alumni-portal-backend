@@ -3,6 +3,7 @@ import alumniDetailsRoutes from './alumniDetails';
 import authRoutes from './auth';
 import contactRoutes from './contact';
 import eventRoutes from './event';
+import jobRoutes from './job';
 import referralRoutes from './referral';
 import userRoutes from './user';
 
@@ -22,5 +23,6 @@ router.use('/contactus', contactRoutes);
 router.use('/events', eventRoutes);
 
 router.use('/referrals', referralRoutes);
+router.use('/jobs', jobRoutes);
 
 export default router;

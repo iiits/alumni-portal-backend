@@ -44,7 +44,7 @@ router.get(
     '/user/:userId',
     protect,
     requireVerified,
-    requireRole(UserRole.STUDENT),
+    requireRole(UserRole.ALUMNI),
     getUserReferrals,
 );
 
@@ -109,6 +109,7 @@ router.get(
     '/submissions/:referralId',
     protect,
     requireVerified,
+    requireRole(UserRole.ALUMNI),
     getReferralSubmissions,
 );
 
