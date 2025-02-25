@@ -112,6 +112,7 @@ export const updateAlumniDetails = async (
     next: NextFunction,
 ): Promise<void> => {
     try {
+        const id = req.params.id;
         const { jobPosition, education, ...rest } = req.body;
 
         const formattedJobPosition = jobPosition?.map((job: any) => ({
@@ -130,8 +131,8 @@ export const updateAlumniDetails = async (
             ...(education && { education: formattedEducation }),
         };
 
-        const alumniDetails = await AlumniDetails.findByIdAndUpdate(
-            req.params.id,
+        const alumniDetails = await AlumniDetails.findOneAndUpdate(
+            {id},
             updateData,
             { new: true, runValidators: true },
         );
