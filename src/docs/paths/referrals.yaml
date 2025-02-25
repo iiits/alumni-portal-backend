@@ -3,7 +3,7 @@ paths:
         get:
             tags:
                 - Referrals
-            summary: Get all referrals
+            summary: Get all referrals (Admin only)
             security:
                 - bearerAuth: []
             responses:
@@ -26,7 +26,7 @@ paths:
         post:
             tags:
                 - Referrals
-            summary: Create new referral
+            summary: Create new referral (Alumni/Admin only)
             security:
                 - bearerAuth: []
             requestBody:
@@ -82,7 +82,7 @@ paths:
         get:
             tags:
                 - Referrals
-            summary: Get user's referrals
+            summary: Get user's referrals (Original poster/Admin only)
             security:
                 - bearerAuth: []
             parameters:
@@ -103,7 +103,7 @@ paths:
         put:
             tags:
                 - Referrals
-            summary: Update referral
+            summary: Update referral (Original poster/Admin only)
             security:
                 - bearerAuth: []
             parameters:
@@ -131,7 +131,7 @@ paths:
         delete:
             tags:
                 - Referrals
-            summary: Delete referral
+            summary: Delete referral (Original poster/Admin only)
             security:
                 - bearerAuth: []
             parameters:
@@ -154,7 +154,7 @@ paths:
         get:
             tags:
                 - Referral Submissions
-            summary: Get all submissions for a specific referral
+            summary: Get all submissions for a specific referral (Original poster/Admin only)
             security:
                 - bearerAuth: []
             parameters:
@@ -214,7 +214,7 @@ paths:
         post:
             tags:
                 - Referral Submissions
-            summary: Create new submission
+            summary: Create new submission (Alumni/Admin only)
             security:
                 - bearerAuth: []
             requestBody:
@@ -237,7 +237,7 @@ paths:
         put:
             tags:
                 - Referral Submissions
-            summary: Update submission status
+            summary: Update submission status (Original poster/Admin only)
             security:
                 - bearerAuth: []
             parameters:

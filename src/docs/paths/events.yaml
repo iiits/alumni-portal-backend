@@ -3,7 +3,7 @@ paths:
         get:
             tags:
                 - Events
-            summary: Get all events
+            summary: Get all events (Admin only)
             security:
                 - bearerAuth: []
             responses:
@@ -30,7 +30,7 @@ paths:
         post:
             tags:
                 - Events
-            summary: Create new event
+            summary: Create new event (Admin only)
             security:
                 - bearerAuth: []
             requestBody:
@@ -94,7 +94,7 @@ paths:
         put:
             tags:
                 - Events
-            summary: Update event
+            summary: Update event (Admin only)
             security:
                 - bearerAuth: []
             parameters:
@@ -125,7 +125,7 @@ paths:
         delete:
             tags:
                 - Events
-            summary: Delete event
+            summary: Delete event (Admin only)
             security:
                 - bearerAuth: []
             parameters:
