@@ -114,8 +114,6 @@ export const getFilteredReferrals = async (
             };
         }
 
-        console.log(query);
-
         const referrals = await Referral.find(query)
             .populate({
                 path: 'postedBy',

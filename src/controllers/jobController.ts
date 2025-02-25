@@ -1,110 +1,225 @@
 import { Request, Response } from 'express';
-import Job from '../models/Job';
-import { apiError, apiNotFound, apiSuccess } from '../utils/apiResponses';
+import JobPosting from '../models/Job';
+import {
+    apiError,
+    apiNotFound,
+    apiSuccess,
+    apiUnauthorized,
+} from '../utils/apiResponses';
 
-export const createJob = async (req: Request, res: Response) => {
+// Create job posting
+export const createJobPosting = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
     try {
-        const {
-            id,
-            name,
-            company,
-            jobTitle,
-            eligibility,
-            description,
-            type,
-            stipend,
-            duration,
-            workType,
-            links,
-            postedBy,
-        } = req.body;
+        const userId = req.user?.id;
+        const jobPosting = new JobPosting({
+            ...req.body,
+            postedBy: userId,
+        });
+        await jobPosting.save();
+        apiSuccess(res, jobPosting, 'Job posting created successfully', 201);
+    } catch (error) {
+        apiError(
+            res,
+            error instanceof Error
+                ? error.message
+                : 'Failed to create job posting',
+        );
+    }
+};
 
-        const job = new Job({
-            id,
-            name,
-            company,
-            jobTitle,
-            eligibility,
-            description,
-            type,
-            stipend,
-            duration,
-            workType,
-            links,
-            postedBy,
+// Get all job postings with filters
+export const getFilteredJobPostings = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
+    try {
+        const { month, year, type, workType, batch } = req.query;
+        let query: any = {};
+
+        // Existing date filter logic
+        if (month && year) {
+            const monthNum = parseInt(month as string);
+            const yearNum = parseInt(year as string);
+
+            if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+                throw new Error('Invalid month. Must be between 1 and 12');
+            }
+
+            const startDate = new Date(yearNum, monthNum - 1, 1);
+            const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59);
+
+            query.$or = [
+                { lastApplyDate: { $gte: startDate, $lte: endDate } },
+                { postedOn: { $gte: startDate, $lte: endDate } },
+            ];
+        } else {
+            query.lastApplyDate = { $gte: new Date() };
+        }
+
+        // Add new filters
+        if (type) query.type = type;
+        if (workType) query.workType = workType;
+        if (batch) {
+            // Handle both single string and array of strings
+            const batchArray = Array.isArray(batch) ? batch : [batch];
+            query['eligibility.batch'] = { $in: batchArray };
+        }
+
+        const jobPostings = await JobPosting.find(query)
+            .populate({
+                path: 'postedBy',
+                model: 'User',
+                localField: 'postedBy',
+                foreignField: 'id',
+                select: 'id name collegeEmail personalEmail',
+            })
+            .sort({ lastApplyDate: -1 });
+
+        apiSuccess(res, jobPostings, 'Job postings retrieved successfully');
+    } catch (error) {
+        apiError(
+            res,
+            error instanceof Error
+                ? error.message
+                : 'Failed to fetch job postings',
+        );
+    }
+};
+
+// Get all job postings (admin only)
+export const getAllJobPostings = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
+    try {
+        const jobs = await JobPosting.find()
+            .populate({
+                path: 'postedBy',
+                model: 'User',
+                localField: 'postedBy',
+                foreignField: 'id',
+                select: 'id name collegeEmail personalEmail',
+            })
+            .sort({ lastApplyDate: -1 });
+
+        apiSuccess(res, jobs, 'Job postings retrieved successfully');
+    } catch (error) {
+        apiError(
+            res,
+            error instanceof Error
+                ? error.message
+                : 'Failed to fetch job postings',
+        );
+    }
+};
+
+// Get user's job postings
+export const getUserJobPostings = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
+    try {
+        const userId = req.user?.id;
+        const requestedUserId = req.params.userId;
+
+        if (userId !== requestedUserId && req.user?.role !== 'admin') {
+            apiUnauthorized(
+                res,
+                "You are not authorized to view this user's job postings",
+            );
+            return;
+        }
+
+        const jobs = await JobPosting.find({ postedBy: requestedUserId })
+            .populate({
+                path: 'postedBy',
+                model: 'User',
+                localField: 'postedBy',
+                foreignField: 'id',
+                select: 'id name collegeEmail personalEmail',
+            })
+            .sort({ lastApplyDate: -1 });
+
+        apiSuccess(res, jobs, 'User job postings retrieved successfully');
+    } catch (error) {
+        apiError(
+            res,
+            error instanceof Error
+                ? error.message
+                : 'Failed to fetch user job postings',
+        );
+    }
+};
+
+// Update job posting
+export const updateJobPosting = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
+    try {
+        const job = await JobPosting.findOneAndUpdate(
+            {
+                id: req.params.id,
+                $or: [
+                    { postedBy: req.user.id },
+                    { $expr: { $eq: [req.user.role, 'admin'] } },
+                ],
+            },
+            req.body,
+            { new: true, runValidators: true },
+        ).populate({
+            path: 'postedBy',
+            model: 'User',
+            localField: 'postedBy',
+            foreignField: 'id',
+            select: 'id name collegeEmail personalEmail',
         });
 
-        await job.save();
-        return apiSuccess(res, job, 'Job posted successfully', 201);
-    } catch (error) {
-        return apiError(
-            res,
-            error instanceof Error ? error.message : 'Failed to create job',
-            400,
-        );
-    }
-};
-
-export const getJobs = async (req: Request, res: Response) => {
-    try {
-        const jobs = await Job.find().populate('postedBy', 'name email');
-        return apiSuccess(res, jobs, 'Jobs retrieved successfully');
-    } catch (error) {
-        return apiError(
-            res,
-            error instanceof Error ? error.message : 'Failed to fetch jobs',
-        );
-    }
-};
-
-export const getJobById = async (req: Request, res: Response) => {
-    try {
-        const job = await Job.findById(req.params.id).populate(
-            'postedBy',
-            'name email',
-        );
         if (!job) {
-            return apiNotFound(res, 'Job not found');
+            apiNotFound(res, 'Job posting not found or unauthorized');
+            return;
         }
-        return apiSuccess(res, job, 'Job retrieved successfully');
+
+        apiSuccess(res, job, 'Job posting updated successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
-            error instanceof Error ? error.message : 'Failed to fetch job',
+            error instanceof Error
+                ? error.message
+                : 'Failed to update job posting',
         );
     }
 };
 
-export const updateJob = async (req: Request, res: Response) => {
+// Delete job posting
+export const deleteJobPosting = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
     try {
-        const job = await Job.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true,
+        const job = await JobPosting.findOneAndDelete({
+            id: req.params.id,
+            $or: [
+                { postedBy: req.user.id },
+                { $expr: { $eq: [req.user.role, 'admin'] } },
+            ],
         });
-        if (!job) {
-            return apiNotFound(res, 'Job not found');
-        }
-        return apiSuccess(res, job, 'Job updated successfully');
-    } catch (error) {
-        return apiError(
-            res,
-            error instanceof Error ? error.message : 'Failed to update job',
-            400,
-        );
-    }
-};
 
-export const deleteJob = async (req: Request, res: Response) => {
-    try {
-        const job = await Job.findByIdAndDelete(req.params.id);
         if (!job) {
-            return apiNotFound(res, 'Job not found');
+            apiNotFound(res, 'Job posting not found or unauthorized');
+            return;
         }
-        return apiSuccess(res, null, 'Job deleted successfully');
+
+        apiSuccess(res, null, 'Job posting deleted successfully');
     } catch (error) {
-        return apiError(
+        apiError(
             res,
-            error instanceof Error ? error.message : 'Failed to delete job',
+            error instanceof Error
+                ? error.message
+                : 'Failed to delete job posting',
         );
     }
 };
