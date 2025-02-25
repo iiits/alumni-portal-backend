@@ -1,0 +1,170 @@
+paths:
+    /jobs:
+        get:
+            tags:
+                - Jobs
+            summary: Get all jobs (Admin only)
+            security:
+                - bearerAuth: []
+            responses:
+                200:
+                    description: Jobs retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/JobPosting'
+                401:
+                    description: Not authorized
+
+        post:
+            tags:
+                - Jobs
+            summary: Create new job posting (Alumni/Admin only)
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/JobPosting'
+            responses:
+                201:
+                    description: Job posting created successfully
+                401:
+                    description: Not authorized
+                403:
+                    description: Insufficient permissions
+
+    /jobs/filter:
+        get:
+            tags:
+                - Jobs
+            summary: Get all jobs with filtering
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: query
+                  name: month
+                  schema:
+                      type: integer
+                  description: Month number (1-12)
+                - in: query
+                  name: year
+                  schema:
+                      type: integer
+                  description: Year (YYYY)
+                - in: query
+                  name: type
+                  schema:
+                      type: string
+                      enum: [fulltime, parttime, internship, others]
+                - in: query
+                  name: workType
+                  schema:
+                      type: string
+                      enum: [onsite, remote, hybrid]
+                - in: query
+                  name: batch
+                  schema:
+                      type: array
+                      items:
+                          type: string
+                  description: Filter by eligible batches
+                  style: form
+                  explode: true
+            responses:
+                200:
+                    description: Jobs retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/JobPosting'
+                401:
+                    description: Not authorized
+
+    /jobs/user/{userId}:
+        get:
+            tags:
+                - Jobs
+            summary: Get user's job postings (Original poster/Admin)
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: userId
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: User job postings retrieved successfully
+                401:
+                    description: Not authorized
+                403:
+                    description: Insufficient permissions
+
+    /jobs/{id}:
+        put:
+            tags:
+                - Jobs
+            summary: Update job posting (Original poster/Admin)
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/JobPosting'
+            responses:
+                200:
+                    description: Job posting updated successfully
+                401:
+                    description: Not authorized
+                403:
+                    description: Insufficient permissions
+                404:
+                    description: Job posting not found
+
+        delete:
+            tags:
+                - Jobs
+            summary: Delete job posting (Original poster/Admin)
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Job posting deleted successfully
+                401:
+                    description: Not authorized
+                403:
+                    description: Insufficient permissions
+                404:
+                    description: Job posting not found
