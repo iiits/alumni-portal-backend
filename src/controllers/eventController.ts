@@ -8,25 +8,47 @@ export const getFilteredEvents = async (
     res: Response,
 ): Promise<void> => {
     try {
-        const { year } = req.query;
-        const requestedYear = req.query.year
-            ? parseInt(year as string)
-            : new Date().getFullYear();
+        const { year, type } = req.query;
 
-        if (isNaN(requestedYear)) {
-            apiError(res, 'Invalid year provided');
-            return;
+        const currentDate = new Date();
+        let startDate: Date;
+        let endDate: Date;
+
+        if (year) {
+            const requestedYear = parseInt(year as string);
+            if (isNaN(requestedYear)) {
+                apiError(res, 'Invalid year provided');
+                return;
+            }
+            startDate = new Date(requestedYear, 0, 1);
+            endDate =
+                requestedYear === currentDate.getFullYear()
+                    ? currentDate
+                    : new Date(requestedYear, 11, 31, 23, 59, 59);
+        } else {
+            startDate = currentDate;
+            endDate = new Date(
+                currentDate.getFullYear() + 100,
+                11,
+                31,
+                23,
+                59,
+                59,
+            );
         }
 
-        const startDate = new Date(requestedYear, 0, 1);
-        const endDate = new Date(requestedYear, 11, 31, 23, 59, 59);
-
-        const events = await Event.find({
+        const query: any = {
             dateTime: {
                 $gte: startDate,
                 $lte: endDate,
             },
-        })
+        };
+
+        if (type) {
+            query.type = type;
+        }
+
+        const events = await Event.find(query)
             .sort({ dateTime: 1 })
             .select('-__v');
 
