@@ -37,7 +37,7 @@ export const createAlumniDetails = async (
             education: formattedEducation,
         });
 
-        await User.updateOne({ id: userId }, { alumniDetails: createdAlumni.id });
+        await User.updateOne({ id: userId }, { alumniDetails: createdAlumni.id, role: "alumni" });
 
         const emailSent = await sendAlumniVerificationEmail(userId, name);
         if (!emailSent) {
