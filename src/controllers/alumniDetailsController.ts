@@ -37,6 +37,8 @@ export const createAlumniDetails = async (
             education: formattedEducation,
         });
 
+        await User.updateOne({ id: userId }, { alumniDetails: createdAlumni.id });
+
         const emailSent = await sendAlumniVerificationEmail(userId, name);
         if (!emailSent) {
             console.error('Failed to send verification email to admin.');
