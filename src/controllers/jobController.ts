@@ -42,7 +42,7 @@ export const getFilteredJobPostings = async (
         if (year) {
             const yearNum = parseInt(year as string);
 
-            if (isNaN(yearNum) || yearNum < 2000 || yearNum > 2100) {
+            if (isNaN(yearNum)) {
                 throw new Error('Invalid year');
             }
 
@@ -178,17 +178,25 @@ export const updateJobPosting = async (
     res: Response,
 ): Promise<void> => {
     try {
-        const job = await JobPosting.findOneAndUpdate(
-            {
-                id: req.params.id,
-                $or: [
-                    { postedBy: req.user.id },
-                    { $expr: { $eq: [req.user.role, 'admin'] } },
-                ],
-            },
-            req.body,
-            { new: true, runValidators: true },
-        ).populate({
+        const existingJob = await JobPosting.findOne({
+            id: req.params.id,
+            $or: [
+                { postedBy: req.user.id },
+                { $expr: { $eq: [req.user.role, 'admin'] } },
+            ],
+        });
+
+        if (!existingJob) {
+            apiNotFound(res, 'Job posting not found or unauthorized');
+            return;
+        }
+
+        // Apply updates & save
+        Object.assign(existingJob, req.body);
+
+        const updatedJob = await existingJob.save();
+
+        await updatedJob.populate({
             path: 'postedBy',
             model: 'User',
             localField: 'postedBy',
@@ -196,12 +204,7 @@ export const updateJobPosting = async (
             select: '-_id id name collegeEmail personalEmail',
         });
 
-        if (!job) {
-            apiNotFound(res, 'Job posting not found or unauthorized');
-            return;
-        }
-
-        apiSuccess(res, job, 'Job posting updated successfully');
+        apiSuccess(res, updatedJob, 'Job posting updated successfully');
     } catch (error) {
         apiError(
             res,
