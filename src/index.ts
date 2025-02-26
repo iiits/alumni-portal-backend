@@ -9,6 +9,7 @@ import { connectDB } from './config/db';
 import { verifyTransporter } from './config/email';
 import { specs } from './config/swagger';
 import routes from './routes';
+import { initScheduledTasks } from './services/schedulesTasks';
 import { morganMiddleware } from './utils/logger';
 
 // Load env variables
@@ -16,8 +17,11 @@ dotenv.config();
 
 const app: Application = express();
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB & initialize scheduled tasks (cron jobs)
+connectDB().then(() => {
+    initScheduledTasks();
+    console.log('Scheduled tasks initialized');
+});
 
 // Security Middleware
 app.use(helmet());
