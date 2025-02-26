@@ -94,7 +94,7 @@ export const getFilteredJobPostings = async (
             .select(
                 '-_id id jobName company role eligibility description type stipend duration workType links postedBy postedOn lastApplyDate',
             )
-            .sort({ lastApplyDate: -1 });
+            .sort({ lastApplyDate: 1 });
 
         apiSuccess(res, jobPostings, 'Job postings retrieved successfully');
     } catch (error) {
