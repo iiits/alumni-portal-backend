@@ -112,7 +112,17 @@ export const updateUser = async (
         }
 
         // Prevent updating sensitive fields
-        const { password, verified, role, ...updateData } = req.body;
+        const {
+            password,
+            verified,
+            role,
+            collegeEmail,
+            userId,
+            batch,
+            department,
+            alumniDetails,
+            ...updateData
+        } = req.body;
 
         const user = await User.findOneAndUpdate(
             { id: req.params.id },
