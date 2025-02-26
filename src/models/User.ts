@@ -49,7 +49,7 @@ const UserSchema = new mongoose.Schema<IUser>({
         type: String,
         required: true,
         unique: true,
-        match: /^[AS]\d{4}00[123]\d{4}$/,
+        match: /^[ASF]\d{4}00[123]\d{4}$/,
     },
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
