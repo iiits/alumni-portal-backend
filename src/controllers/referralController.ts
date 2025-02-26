@@ -76,7 +76,7 @@ export const getFilteredReferrals = async (
         if (year) {
             const yearNum = parseInt(year as string);
 
-            if (isNaN(yearNum) || yearNum < 2000 || yearNum > 2100) {
+            if (isNaN(yearNum)) {
                 throw new Error('Invalid year');
             }
 
