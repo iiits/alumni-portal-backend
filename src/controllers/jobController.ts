@@ -39,27 +39,42 @@ export const getFilteredJobPostings = async (
         const { month, year, type, workType, batch } = req.query;
         let query: any = {};
 
-        // Existing date filter logic
-        if (month && year) {
-            const monthNum = parseInt(month as string);
+        if (year) {
             const yearNum = parseInt(year as string);
 
-            if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
-                throw new Error('Invalid month. Must be between 1 and 12');
+            if (isNaN(yearNum) || yearNum < 2000 || yearNum > 2100) {
+                throw new Error('Invalid year');
             }
 
-            const startDate = new Date(yearNum, monthNum - 1, 1);
-            const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59);
+            if (month) {
+                // Month and Year filtering
+                const monthNum = parseInt(month as string);
+                if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+                    throw new Error('Invalid month. Must be between 1 and 12');
+                }
 
-            query.$or = [
-                { lastApplyDate: { $gte: startDate, $lte: endDate } },
-                { postedOn: { $gte: startDate, $lte: endDate } },
-            ];
+                const startDate = new Date(yearNum, monthNum - 1, 1);
+                const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59);
+
+                query.$or = [
+                    { lastApplyDate: { $gte: startDate, $lte: endDate } },
+                    { postedOn: { $gte: startDate, $lte: endDate } },
+                ];
+            } else {
+                // Year only filtering
+                const startDate = new Date(yearNum, 0, 1);
+                const endDate = new Date(yearNum, 11, 31, 23, 59, 59);
+
+                query.$or = [
+                    { lastApplyDate: { $gte: startDate, $lte: endDate } },
+                    { postedOn: { $gte: startDate, $lte: endDate } },
+                ];
+            }
         } else {
+            // Default: Show upcoming jobs
             query.lastApplyDate = { $gte: new Date() };
         }
 
-        // Add new filters
         if (type) query.type = type;
         if (workType) query.workType = workType;
         if (batch) {
