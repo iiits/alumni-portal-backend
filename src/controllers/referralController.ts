@@ -204,17 +204,25 @@ export const updateReferral = async (
     res: Response,
 ): Promise<void> => {
     try {
-        const referral = await Referral.findOneAndUpdate(
-            {
-                id: req.params.id,
-                $or: [
-                    { postedBy: req.user.id },
-                    { $expr: { $eq: [req.user.role, 'admin'] } },
-                ],
-            },
-            req.body,
-            { new: true, runValidators: true },
-        ).populate({
+        const existingReferral = await Referral.findOne({
+            id: req.params.id,
+            $or: [
+                { postedBy: req.user.id },
+                { $expr: { $eq: [req.user.role, 'admin'] } },
+            ],
+        });
+
+        if (!existingReferral) {
+            apiNotFound(res, 'Referral not found or unauthorized');
+            return;
+        }
+
+        // Apply updates and save
+        Object.assign(existingReferral, req.body);
+
+        const updatedReferral = await existingReferral.save();
+
+        await updatedReferral.populate({
             path: 'postedBy',
             model: 'User',
             localField: 'postedBy',
@@ -222,12 +230,7 @@ export const updateReferral = async (
             select: '-_id id name collegeEmail personalEmail',
         });
 
-        if (!referral) {
-            apiNotFound(res, 'Referral not found or unauthorized');
-            return;
-        }
-
-        apiSuccess(res, referral, 'Referral updated successfully');
+        apiSuccess(res, updatedReferral, 'Referral updated successfully');
     } catch (error) {
         apiError(
             res,
