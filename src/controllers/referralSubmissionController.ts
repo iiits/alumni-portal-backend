@@ -36,7 +36,7 @@ export const getReferralSubmissions = async (
                 model: 'User',
                 localField: 'userId',
                 foreignField: 'id',
-                select: 'id name collegeEmail personalEmail',
+                select: '-_id id name collegeEmail personalEmail',
             })
             .sort({ submittedAt: -1 });
 
@@ -65,7 +65,7 @@ export const getUserSubmissions = async (
                 model: 'JobReferral',
                 localField: 'referralId',
                 foreignField: 'id',
-                select: 'id isActive numberOfReferrals jobDetails postedBy postedOn lastApplyDate -_id',
+                select: '-_id id isActive numberOfReferrals jobDetails postedBy postedOn lastApplyDate -_id',
             })
             .sort({ submittedAt: -1 });
 

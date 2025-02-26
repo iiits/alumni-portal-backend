@@ -89,8 +89,11 @@ export const getFilteredJobPostings = async (
                 model: 'User',
                 localField: 'postedBy',
                 foreignField: 'id',
-                select: 'id name collegeEmail personalEmail',
+                select: '-_id id name collegeEmail personalEmail',
             })
+            .select(
+                '-_id id jobName company role eligibility description type stipend duration workType links postedBy postedOn lastApplyDate',
+            )
             .sort({ lastApplyDate: -1 });
 
         apiSuccess(res, jobPostings, 'Job postings retrieved successfully');
@@ -116,7 +119,7 @@ export const getAllJobPostings = async (
                 model: 'User',
                 localField: 'postedBy',
                 foreignField: 'id',
-                select: 'id name collegeEmail personalEmail',
+                select: '-_id id name collegeEmail personalEmail',
             })
             .sort({ lastApplyDate: -1 });
 
@@ -154,7 +157,7 @@ export const getUserJobPostings = async (
                 model: 'User',
                 localField: 'postedBy',
                 foreignField: 'id',
-                select: 'id name collegeEmail personalEmail',
+                select: '-_id id name collegeEmail personalEmail',
             })
             .sort({ lastApplyDate: -1 });
 
@@ -190,7 +193,7 @@ export const updateJobPosting = async (
             model: 'User',
             localField: 'postedBy',
             foreignField: 'id',
-            select: 'id name collegeEmail personalEmail',
+            select: '-_id id name collegeEmail personalEmail',
         });
 
         if (!job) {

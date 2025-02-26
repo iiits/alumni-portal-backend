@@ -43,7 +43,7 @@ export const getReferrals = async (
                 model: 'User',
                 localField: 'postedBy',
                 foreignField: 'id',
-                select: 'id name collegeEmail personalEmail',
+                select: '-_id id name collegeEmail personalEmail',
             })
             .sort({ lastApplyDate: -1 });
 
@@ -141,7 +141,7 @@ export const getFilteredReferrals = async (
                 model: 'User',
                 localField: 'postedBy',
                 foreignField: 'id',
-                select: 'id name collegeEmail personalEmail',
+                select: '-_id id name collegeEmail personalEmail',
             })
             .select(
                 'id isActive numberOfReferrals jobDetails postedBy postedOn lastApplyDate -_id',
@@ -183,7 +183,7 @@ export const getUserReferrals = async (
                 model: 'User',
                 localField: 'postedBy',
                 foreignField: 'id',
-                select: 'id name collegeEmail personalEmail',
+                select: '-_id id name collegeEmail personalEmail',
             })
             .sort({ lastApplyDate: -1 });
 
@@ -219,7 +219,7 @@ export const updateReferral = async (
             model: 'User',
             localField: 'postedBy',
             foreignField: 'id',
-            select: 'id name collegeEmail personalEmail',
+            select: '-_id id name collegeEmail personalEmail',
         });
 
         if (!referral) {
