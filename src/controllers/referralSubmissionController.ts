@@ -31,13 +31,25 @@ export const getReferralSubmissions = async (
         const submissions = await ReferralSubmission.find({
             referralId: req.params.referralId,
         })
-            .populate({
-                path: 'userId',
-                model: 'User',
-                localField: 'userId',
-                foreignField: 'id',
-                select: '-_id id name collegeEmail personalEmail',
-            })
+            .populate([
+                {
+                    path: 'userId',
+                    model: 'User',
+                    localField: 'userId',
+                    foreignField: 'id',
+                    select: '-_id id name collegeEmail personalEmail',
+                },
+                {
+                    path: 'referralId',
+                    model: 'JobReferral',
+                    localField: 'referralId',
+                    foreignField: 'id',
+                    select: '-_id id jobDetails',
+                },
+            ])
+            .select(
+                '-_id id referralId userId resumeLink coverLetter whyReferMe status submittedAt',
+            )
             .sort({ submittedAt: -1 });
 
         apiSuccess(res, submissions, 'Submissions retrieved successfully');
@@ -67,6 +79,9 @@ export const getUserSubmissions = async (
                 foreignField: 'id',
                 select: '-_id id isActive numberOfReferrals jobDetails postedBy postedOn lastApplyDate -_id',
             })
+            .select(
+                '-_id id referralId resumeLink coverLetter whyReferMe status submittedAt',
+            )
             .sort({ submittedAt: -1 });
 
         apiSuccess(res, submissions, 'User submissions retrieved successfully');

@@ -214,7 +214,7 @@ paths:
         post:
             tags:
                 - Referral Submissions
-            summary: Create new submission (Alumni/Admin only)
+            summary: Create new submission
             security:
                 - bearerAuth: []
             requestBody:
