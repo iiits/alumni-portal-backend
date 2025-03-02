@@ -28,7 +28,7 @@ export const sendEmail = async ({ to, subject, html }: SendEmailParams) => {
 };
 
 export const sendVerificationEmail = async (email: string, token: string) => {
-    const verificationUrl = `${process.env.CLIENT_URL}/verifyemail?token=${token}`;
+    const verificationUrl = `${process.env.CLIENT_URL}/auth/verifyemail?token=${token}`;
     return sendEmail({
         to: email,
         subject: 'Email Verification',
@@ -70,7 +70,7 @@ export const sendPasswordResetEmail = async (
     emails: string[],
     token: string,
 ) => {
-    const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
+    const resetUrl = `${process.env.CLIENT_URL}/auth/reset-password?token=${token}`;
     return sendEmail({
         to: emails.join(','),
         subject: 'Password Reset Request',
