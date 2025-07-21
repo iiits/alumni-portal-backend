@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { PipelineStage } from 'mongoose';
 import Event from '../../models/Event';
 import JobPosting from '../../models/Job';
+import LoginEvent from '../../models/LoginEvent';
 import Referral from '../../models/Referral';
 import User from '../../models/User';
 
@@ -25,6 +26,14 @@ interface TopItem {
     name: string;
     count: number;
 }
+
+// Utility function to get DateTime in UTC
+const getUtcDateTime = (date?: Date | null): DateTime => {
+    if (date) {
+        return DateTime.fromJSDate(date).setZone('utc');
+    }
+    return DateTime.utc();
+};
 
 // Helper function to calculate growth data
 const calculateGrowth = (
@@ -59,7 +68,7 @@ const calculateGrowth = (
 const getDateRange = (
     period: '1d' | '7d' | '30d',
 ): { start: Date; end: Date; previousStart: Date; previousEnd: Date } => {
-    const now = DateTime.now();
+    const now = getUtcDateTime();
     const days = period === '1d' ? 1 : period === '7d' ? 7 : 30;
 
     return {
@@ -104,8 +113,8 @@ const getUserTimelineData = async (
 
     // Fill in missing dates/hours with zero counts
     const timeline: TimelineData[] = [];
-    let current = DateTime.fromJSDate(start);
-    const endDt = DateTime.fromJSDate(end);
+    let current = getUtcDateTime(start);
+    const endDt = getUtcDateTime(end);
 
     while (current <= endDt) {
         const dateStr = isHourly
@@ -284,5 +293,96 @@ export const getJobAnalytics = async () => {
         active,
         topCompanies,
         topRoles,
+    };
+};
+
+// Get login analytics
+const getLoginTimelineData = async (
+    start: Date,
+    end: Date,
+    isHourly: boolean = false,
+): Promise<TimelineData[]> => {
+    const pipeline: PipelineStage[] = [
+        {
+            $match: {
+                timestamp: { $gte: start, $lte: end },
+            },
+        },
+        {
+            $group: {
+                _id: {
+                    $dateToString: {
+                        format: isHourly ? '%Y-%m-%d-%H' : '%Y-%m-%d',
+                        date: '$timestamp',
+                    },
+                },
+                count: { $sum: 1 },
+            },
+        },
+        {
+            $sort: { _id: 1 as 1 },
+        },
+    ];
+
+    const results = await LoginEvent.aggregate(pipeline);
+
+    // Fill in missing dates/hours with zero counts
+    const timeline: TimelineData[] = [];
+    let current = getUtcDateTime(start);
+    const endDt = getUtcDateTime(end);
+
+    while (current <= endDt) {
+        const dateStr = isHourly
+            ? current.toFormat('yyyy-MM-dd-HH')
+            : current.toFormat('yyyy-MM-dd');
+
+        const found = results.find(r => r._id === dateStr);
+        timeline.push({
+            date: isHourly
+                ? current.toFormat('HH:00')
+                : current.toFormat('yyyy-MM-dd'),
+            count: found ? found.count : 0,
+        });
+
+        current = current.plus(isHourly ? { hours: 1 } : { days: 1 });
+    }
+
+    return timeline;
+};
+
+// Get login event timeline data
+const getLoginEventTimeline = async (
+    period: '1d' | '7d' | '30d',
+): Promise<TimelineData[]> => {
+    const { start, end } = getDateRange(period);
+    const isHourly = period === '1d';
+
+    return getLoginTimelineData(start, end, isHourly);
+};
+
+// Get current active users (logged in within last 60 minutes)
+const getActiveUsers = async (): Promise<number> => {
+    const thirtyMinutesAgo = getUtcDateTime().minus({ minutes: 60 }).toJSDate();
+    return LoginEvent.countDocuments({
+        timestamp: { $gte: thirtyMinutesAgo },
+    });
+};
+
+// Get login analytics
+export const getLoginAnalytics = async () => {
+    const [activeUsers, dayData, weekData, monthData] = await Promise.all([
+        getActiveUsers(),
+        getLoginEventTimeline('1d'),
+        getLoginEventTimeline('7d'),
+        getLoginEventTimeline('30d'),
+    ]);
+
+    return {
+        activeUsers,
+        timeline: {
+            '1d': dayData,
+            '7d': weekData,
+            '30d': monthData,
+        },
     };
 };

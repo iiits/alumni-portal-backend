@@ -43,20 +43,47 @@ paths:
                                                         type: object
                                                         properties:
                                                             1d:
-                                                                type: number
-                                                                example: 2.5
+                                                                type: object
+                                                                properties:
+                                                                    rate:
+                                                                        type: number
+                                                                        example: 2.5
+                                                                    count:
+                                                                        type: number
+                                                                        example: 10
                                                             7d:
-                                                                type: number
-                                                                example: 15
+                                                                type: object
+                                                                properties:
+                                                                    rate:
+                                                                        type: number
+                                                                        example: 15
+                                                                    count:
+                                                                        type: number
+                                                                        example: 50
                                                             30d:
-                                                                type: number
-                                                                example: 25
-                                                            allTime:
-                                                                type: number
-                                                                example: 150
+                                                                type: object
+                                                                properties:
+                                                                    rate:
+                                                                        type: number
+                                                                        example: 25
+                                                                    count:
+                                                                        type: number
+                                                                        example: 200
                                                     timeline:
                                                         type: object
                                                         properties:
+                                                            1d:
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        date:
+                                                                            type: string
+                                                                            example: '14:00'
+                                                                            description: 'Hour in UTC (HH:00 format)'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 5
                                                             7d:
                                                                 type: array
                                                                 items:
@@ -65,6 +92,7 @@ paths:
                                                                         date:
                                                                             type: string
                                                                             example: '2025-07-15'
+                                                                            description: 'UTC date (YYYY-MM-DD format)'
                                                                         count:
                                                                             type: number
                                                                             example: 5
@@ -76,20 +104,10 @@ paths:
                                                                         date:
                                                                             type: string
                                                                             example: '2025-06-22'
+                                                                            description: 'UTC date (YYYY-MM-DD format)'
                                                                         count:
                                                                             type: number
                                                                             example: 15
-                                                            allTime:
-                                                                type: array
-                                                                items:
-                                                                    type: object
-                                                                    properties:
-                                                                        date:
-                                                                            type: string
-                                                                            example: '2025-01'
-                                                                        count:
-                                                                            type: number
-                                                                            example: 50
                                                     recentUsers:
                                                         type: array
                                                         items:
@@ -187,6 +205,51 @@ paths:
                                                                 count:
                                                                     type: number
                                                                     example: 12
+                                            logins:
+                                                type: object
+                                                properties:
+                                                    activeUsers:
+                                                        type: number
+                                                        example: 500
+                                                    timeline:
+                                                        type: object
+                                                        properties:
+                                                            1d:
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        date:
+                                                                            type: string
+                                                                            example: '14:00'
+                                                                            description: 'Hour in UTC (HH:00 format)'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 5
+                                                            7d:
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        date:
+                                                                            type: string
+                                                                            example: '2025-07-15'
+                                                                            description: 'UTC date (YYYY-MM-DD format)'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 5
+                                                            30d:
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        date:
+                                                                            type: string
+                                                                            example: '2025-06-22'
+                                                                            description: 'UTC date (YYYY-MM-DD format)'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 15
                                     message:
                                         type: string
                                         example: 'Dashboard analytics retrieved successfully'

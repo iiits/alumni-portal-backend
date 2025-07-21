@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
+import LoginEvent from '../models/LoginEvent';
 import PasswordResetToken from '../models/PasswordResetToken';
 import User from '../models/User';
 import VerificationToken from '../models/VerificationToken';
@@ -232,6 +233,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             apiUnauthorized(res, 'Invalid credentials');
             return;
         }
+
+        // Log login event
+        await LoginEvent.create({
+            userId: user.id,
+            userRole: user.role,
+            timestamp: new Date(),
+        });
 
         // Generate JWT token
         const token = user.getSignedJwtToken();

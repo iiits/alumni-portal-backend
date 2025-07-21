@@ -3,23 +3,24 @@ import { apiError, apiSuccess } from '../utils/apiResponses';
 import {
     getEventAnalytics,
     getJobAnalytics,
+    getLoginAnalytics,
     getReferralAnalytics,
     getUserAnalytics,
 } from './helpers/adminAnalyticsHelper';
 
 // Get admin dashboard analytics
-// TODO: Add active users count when session management is implemented
 export const getDashboardAnalytics = async (
     req: Request,
     res: Response,
 ): Promise<void> => {
     try {
-        const [userStats, eventStats, referralStats, jobStats] =
+        const [userStats, eventStats, referralStats, jobStats, loginStats] =
             await Promise.all([
                 getUserAnalytics(),
                 getEventAnalytics(),
                 getReferralAnalytics(),
                 getJobAnalytics(),
+                getLoginAnalytics(),
             ]);
 
         const analytics = {
@@ -27,6 +28,7 @@ export const getDashboardAnalytics = async (
             events: eventStats,
             referrals: referralStats,
             jobs: jobStats,
+            logins: loginStats,
         };
 
         apiSuccess(
