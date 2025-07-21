@@ -1,4 +1,5 @@
 import express from 'express';
+import adminAnalyticsRoutes from './adminAnalytics';
 import alumniDetailsRoutes from './alumniDetails';
 import authRoutes from './auth';
 import contactRoutes from './contact';
@@ -18,6 +19,7 @@ router.get('/health', (req, res) => {
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/alumni-details', alumniDetailsRoutes);
+router.use('/admin', adminAnalyticsRoutes);
 
 router.use('/contactus', contactRoutes);
 router.use('/events', eventRoutes);
