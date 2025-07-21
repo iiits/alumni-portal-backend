@@ -35,63 +35,76 @@ export interface IUser extends Document {
     getSignedJwtToken(): string;
 }
 
-const UserSchema = new mongoose.Schema<IUser>({
-    id: {
-        type: String,
-        default: () => crypto.randomUUID(),
-        unique: true,
-        index: true,
-    },
-    name: { type: String, required: true, trim: true },
-    collegeEmail: { type: String, required: true, unique: true },
-    personalEmail: { type: String, unique: true, required: true },
-    userId: {
-        type: String,
-        required: true,
-        unique: true,
-        match: /^[ASF]\d{4}00[123]\d{4}$/,
-    },
-    username: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    profilePicture: { type: String },
-    batch: { type: Number, required: true },
-    department: { type: String, enum: ['AIDS', 'CSE', 'ECE'], required: true },
-    profiles: [
-        {
-            type: {
-                type: String,
-                enum: [
-                    'youtube',
-                    'reddit',
-                    'linkedin',
-                    'twitter',
-                    'instagram',
-                    'facebook',
-                    'discord',
-                    'github',
-                ],
-                required: true,
-            },
-            link: { type: String, required: true },
-            visibility: { type: String, enum: ['yes', 'no'], default: 'yes' },
+const UserSchema = new mongoose.Schema<IUser>(
+    {
+        id: {
+            type: String,
+            default: () => crypto.randomUUID(),
+            unique: true,
+            index: true,
         },
-    ],
-    bio: { type: String },
-    role: {
-        type: String,
-        enum: ['admin', 'alumni', 'student'],
-        required: true,
-        default: 'student',
+        name: { type: String, required: true, trim: true },
+        collegeEmail: { type: String, required: true, unique: true },
+        personalEmail: { type: String, unique: true, required: true },
+        userId: {
+            type: String,
+            required: true,
+            unique: true,
+            match: /^[ASF]\d{4}00[123]\d{4}$/,
+        },
+        username: { type: String, required: true, unique: true },
+        password: { type: String, required: true },
+        profilePicture: { type: String },
+        batch: { type: Number, required: true },
+        department: {
+            type: String,
+            enum: ['AIDS', 'CSE', 'ECE'],
+            required: true,
+        },
+        profiles: [
+            {
+                type: {
+                    type: String,
+                    enum: [
+                        'youtube',
+                        'reddit',
+                        'linkedin',
+                        'twitter',
+                        'instagram',
+                        'facebook',
+                        'discord',
+                        'github',
+                    ],
+                    required: true,
+                },
+                link: { type: String, required: true },
+                visibility: {
+                    type: String,
+                    enum: ['yes', 'no'],
+                    default: 'yes',
+                },
+            },
+        ],
+        bio: { type: String },
+        role: {
+            type: String,
+            enum: ['admin', 'alumni', 'student'],
+            required: true,
+            default: 'student',
+        },
+        alumniDetails: {
+            type: String,
+            ref: 'AlumniDetails',
+        },
+        verified: {
+            type: Boolean,
+            default: false,
+        },
     },
-    alumniDetails: {
-        type: String,
-        ref: 'AlumniDetails',
+    {
+        timestamps: true,
     },
-    verified: {
-        type: Boolean,
-        default: false,
-    },
-});
+);
 
 // Compound index for auth lookups
 UserSchema.index({ collegeEmail: 1, userId: 1 });
