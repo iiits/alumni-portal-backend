@@ -2,6 +2,7 @@ import express from 'express';
 import {
     getDashboardAnalytics,
     getDetailedAnalyticsAlumni,
+    getDetailedAnalyticsEvents,
     getDetailedAnalyticsUsers,
 } from '../controllers/adminAnalyticsController';
 import { protect, requireVerified } from '../middleware/auth';
@@ -34,6 +35,15 @@ router.get(
     requireVerified,
     requireRole(UserRole.ADMIN),
     getDetailedAnalyticsAlumni,
+);
+
+// Get detailed event analytics
+router.get(
+    '/events-analytics',
+    protect,
+    requireVerified,
+    requireRole(UserRole.ADMIN),
+    getDetailedAnalyticsEvents,
 );
 
 export default router;

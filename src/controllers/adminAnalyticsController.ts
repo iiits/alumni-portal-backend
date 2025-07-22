@@ -9,6 +9,7 @@ import {
 } from './helpers/adminAnalyticsHelper';
 import { getAlumniAnalytics } from './helpers/alumniAnalyticsHelper';
 import { getDetailedUserAnalytics } from './helpers/detailedUserAnalyticsHelper';
+import { getEventAnalyticsDetailed } from './helpers/eventAnalyticsHelper';
 
 // Get admin dashboard analytics
 export const getDashboardAnalytics = async (
@@ -90,6 +91,28 @@ export const getDetailedAnalyticsAlumni = async (
             error instanceof Error
                 ? error.message
                 : 'Failed to fetch detailed alumni analytics',
+        );
+    }
+};
+
+// Get detailed event analytics
+export const getDetailedAnalyticsEvents = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
+    try {
+        const detailedStats = await getEventAnalyticsDetailed();
+        apiSuccess(
+            res,
+            detailedStats,
+            'Detailed event analytics retrieved successfully',
+        );
+    } catch (error) {
+        apiError(
+            res,
+            error instanceof Error
+                ? error.message
+                : 'Failed to fetch detailed event analytics',
         );
     }
 };
