@@ -1,3 +1,10 @@
+openapi: 3.0.0
+info:
+    title: Alumni Dashboard API
+    version: 1.0.0
+    description: API for Alumni Dashboard analytics and data
+servers:
+    - url: https://api.example.com/v1
 paths:
     /admin/dashboard:
         get:
@@ -495,3 +502,317 @@ paths:
                     description: Forbidden - Invalid role or unverified user
                 500:
                     description: Internal server error
+    /admin/alumni-analytics:
+        get:
+            tags:
+                - Admin Analytics
+            summary: Get detailed alumni analytics
+            description: Get detailed analytics data for alumni including job positions, education, and location statistics
+            security:
+                - bearerAuth: []
+            responses:
+                200:
+                    description: Detailed alumni analytics retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        type: object
+                                        properties:
+                                            overview:
+                                                $ref: '#/components/schemas/UserAnalyticsOverview'
+                                            byBatch:
+                                                type: array
+                                                items:
+                                                    type: object
+                                                    properties:
+                                                        batch:
+                                                            type: string
+                                                            example: '2020'
+                                                        total:
+                                                            type: number
+                                                            example: 150
+                                                        byRole:
+                                                            type: object
+                                                            properties:
+                                                                admin:
+                                                                    type: number
+                                                                    example: 0
+                                                                alumni:
+                                                                    type: number
+                                                                    example: 150
+                                                                student:
+                                                                    type: number
+                                                                    example: 0
+                                                        growth:
+                                                            type: object
+                                                            properties:
+                                                                '7d':
+                                                                    type: object
+                                                                    properties:
+                                                                        count:
+                                                                            type: number
+                                                                            example: 5
+                                                                        rate:
+                                                                            type: number
+                                                                            example: 3.33
+                                                                '30d':
+                                                                    type: object
+                                                                    properties:
+                                                                        count:
+                                                                            type: number
+                                                                            example: 15
+                                                                        rate:
+                                                                            type: number
+                                                                            example: 10
+                                            byDepartment:
+                                                type: array
+                                                items:
+                                                    type: object
+                                                    properties:
+                                                        department:
+                                                            type: string
+                                                            enum:
+                                                                [AIDS, CSE, ECE]
+                                                            example: 'CSE'
+                                                        total:
+                                                            type: number
+                                                            example: 200
+                                                        byRole:
+                                                            type: object
+                                                            properties:
+                                                                admin:
+                                                                    type: number
+                                                                    example: 0
+                                                                alumni:
+                                                                    type: number
+                                                                    example: 200
+                                                                student:
+                                                                    type: number
+                                                                    example: 0
+                                                        growth:
+                                                            type: object
+                                                            properties:
+                                                                '7d':
+                                                                    type: object
+                                                                    properties:
+                                                                        count:
+                                                                            type: number
+                                                                            example: 8
+                                                                        rate:
+                                                                            type: number
+                                                                            example: 4
+                                                                '30d':
+                                                                    type: object
+                                                                    properties:
+                                                                        count:
+                                                                            type: number
+                                                                            example: 25
+                                                                        rate:
+                                                                            type: number
+                                                                            example: 12.5
+                                            jobs:
+                                                type: object
+                                                properties:
+                                                    all:
+                                                        type: object
+                                                        properties:
+                                                            total:
+                                                                type: number
+                                                                example: 500
+                                                            byJobType:
+                                                                type: object
+                                                                additionalProperties:
+                                                                    type: number
+                                                                example:
+                                                                    'Full-time': 300
+                                                                    'Part-time': 100
+                                                                    'Internship': 100
+                                                            byTitle:
+                                                                type: object
+                                                                additionalProperties:
+                                                                    type: number
+                                                                example:
+                                                                    'Software Engineer': 200
+                                                                    'Data Scientist': 150
+                                                            topLocations:
+                                                                type: object
+                                                                properties:
+                                                                    cities:
+                                                                        type: array
+                                                                        items:
+                                                                            $ref: '#/components/schemas/TopLocation'
+                                                                    countries:
+                                                                        type: array
+                                                                        items:
+                                                                            $ref: '#/components/schemas/TopLocation'
+                                                    ongoing:
+                                                        type: object
+                                                        properties:
+                                                            total:
+                                                                type: number
+                                                                example: 300
+                                                            byJobType:
+                                                                type: object
+                                                                additionalProperties:
+                                                                    type: number
+                                                            byTitle:
+                                                                type: object
+                                                                additionalProperties:
+                                                                    type: number
+                                                            topLocations:
+                                                                type: object
+                                                                properties:
+                                                                    cities:
+                                                                        type: array
+                                                                        items:
+                                                                            $ref: '#/components/schemas/TopLocation'
+                                                                    countries:
+                                                                        type: array
+                                                                        items:
+                                                                            $ref: '#/components/schemas/TopLocation'
+                                            education:
+                                                type: object
+                                                properties:
+                                                    all:
+                                                        type: object
+                                                        properties:
+                                                            total:
+                                                                type: number
+                                                                example: 600
+                                                            byDegree:
+                                                                type: object
+                                                                additionalProperties:
+                                                                    type: number
+                                                                example:
+                                                                    'B.Tech': 400
+                                                                    'M.Tech': 150
+                                                                    'PhD': 50
+                                                            byField:
+                                                                type: object
+                                                                additionalProperties:
+                                                                    type: number
+                                                                example:
+                                                                    'Computer Science': 300
+                                                                    'Electronics': 200
+                                                            topLocations:
+                                                                type: object
+                                                                properties:
+                                                                    cities:
+                                                                        type: array
+                                                                        items:
+                                                                            $ref: '#/components/schemas/TopLocation'
+                                                                    countries:
+                                                                        type: array
+                                                                        items:
+                                                                            $ref: '#/components/schemas/TopLocation'
+                                                                    schools:
+                                                                        type: array
+                                                                        items:
+                                                                            $ref: '#/components/schemas/TopLocation'
+                                                    ongoing:
+                                                        type: object
+                                                        properties:
+                                                            total:
+                                                                type: number
+                                                                example: 200
+                                                            byDegree:
+                                                                type: object
+                                                                additionalProperties:
+                                                                    type: number
+                                                            byField:
+                                                                type: object
+                                                                additionalProperties:
+                                                                    type: number
+                                                            topLocations:
+                                                                type: object
+                                                                properties:
+                                                                    cities:
+                                                                        type: array
+                                                                        items:
+                                                                            $ref: '#/components/schemas/TopLocation'
+                                                                    countries:
+                                                                        type: array
+                                                                        items:
+                                                                            $ref: '#/components/schemas/TopLocation'
+                                                                    schools:
+                                                                        type: array
+                                                                        items:
+                                                                            $ref: '#/components/schemas/TopLocation'
+                                            locations:
+                                                type: object
+                                                properties:
+                                                    topCities:
+                                                        type: array
+                                                        items:
+                                                            $ref: '#/components/schemas/TopLocation'
+                                                    topCountries:
+                                                        type: array
+                                                        items:
+                                                            $ref: '#/components/schemas/TopLocation'
+                                    message:
+                                        type: string
+                                        example: 'Detailed alumni analytics retrieved successfully'
+                401:
+                    description: Unauthorized - No token provided
+                403:
+                    description: Forbidden - Invalid role or unverified user
+                500:
+                    description: Internal server error
+components:
+    schemas:
+        TopLocation:
+            type: object
+            properties:
+                _id:
+                    type: string
+                    example: 'Bangalore'
+                count:
+                    type: number
+                    example: 150
+        UserAnalyticsOverview:
+            type: object
+            properties:
+                total:
+                    type: number
+                    example: 1000
+                byRole:
+                    type: object
+                    properties:
+                        admin:
+                            type: number
+                            example: 20
+                        alumni:
+                            type: number
+                            example: 700
+                        student:
+                            type: number
+                            example: 280
+                growth:
+                    type: object
+                    properties:
+                        '7d':
+                            type: object
+                            properties:
+                                count:
+                                    type: number
+                                    example: 50
+                                rate:
+                                    type: number
+                                    example: 5
+                        '30d':
+                            type: object
+                            properties:
+                                count:
+                                    type: number
+                                    example: 150
+                                rate:
+                                    type: number
+                                    example: 15
+security:
+    - bearerAuth: []
