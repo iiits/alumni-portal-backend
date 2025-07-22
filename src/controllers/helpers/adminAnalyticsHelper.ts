@@ -6,29 +6,29 @@ import LoginEvent from '../../models/LoginEvent';
 import Referral from '../../models/Referral';
 import User from '../../models/User';
 
-interface TimelineData {
+export interface TimelineData {
     date: string;
     count: number;
 }
 
-interface GrowthData {
+export interface GrowthData {
     rate: number;
     count: number;
 }
 
-interface RoleDistribution {
+export interface RoleDistribution {
     admin: number;
     alumni: number;
     student: number;
 }
 
-interface TopItem {
+export interface TopItem {
     name: string;
     count: number;
 }
 
 // Utility function to get DateTime in UTC
-const getUtcDateTime = (date?: Date | null): DateTime => {
+export const getUtcDateTime = (date?: Date | null): DateTime => {
     if (date) {
         return DateTime.fromJSDate(date).setZone('utc');
     }

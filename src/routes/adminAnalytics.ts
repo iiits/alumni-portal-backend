@@ -1,5 +1,8 @@
 import express from 'express';
-import { getDashboardAnalytics } from '../controllers/adminAnalyticsController';
+import {
+    getDashboardAnalytics,
+    getDetailedAnalyticsUsers,
+} from '../controllers/adminAnalyticsController';
 import { protect, requireVerified } from '../middleware/auth';
 import { requireRole, UserRole } from '../middleware/rbac';
 
@@ -12,6 +15,15 @@ router.get(
     requireVerified,
     requireRole(UserRole.ADMIN),
     getDashboardAnalytics,
+);
+
+// Get detailed user analytics
+router.get(
+    '/users-analytics',
+    protect,
+    requireVerified,
+    requireRole(UserRole.ADMIN),
+    getDetailedAnalyticsUsers,
 );
 
 export default router;
