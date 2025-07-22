@@ -11,6 +11,7 @@ import { getAlumniAnalytics } from './helpers/alumniAnalyticsHelper';
 import { getDetailedUserAnalytics } from './helpers/detailedUserAnalyticsHelper';
 import { getEventAnalyticsDetailed } from './helpers/eventAnalyticsHelper';
 import { getJobAnalyticsDetailed } from './helpers/jobAnalyticsHelper';
+import { getReferralAnalyticsDetailed } from './helpers/referralAnalyticsHelper';
 
 // Get admin dashboard analytics
 export const getDashboardAnalytics = async (
@@ -136,6 +137,28 @@ export const getDetailedAnalyticsJobs = async (
             error instanceof Error
                 ? error.message
                 : 'Failed to fetch detailed job analytics',
+        );
+    }
+};
+
+// Get detailed referral analytics
+export const getDetailedAnalyticsReferrals = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
+    try {
+        const detailedStats = await getReferralAnalyticsDetailed();
+        apiSuccess(
+            res,
+            detailedStats,
+            'Detailed referral analytics retrieved successfully',
+        );
+    } catch (error) {
+        apiError(
+            res,
+            error instanceof Error
+                ? error.message
+                : 'Failed to fetch detailed referral analytics',
         );
     }
 };

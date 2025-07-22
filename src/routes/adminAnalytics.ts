@@ -4,6 +4,7 @@ import {
     getDetailedAnalyticsAlumni,
     getDetailedAnalyticsEvents,
     getDetailedAnalyticsJobs,
+    getDetailedAnalyticsReferrals,
     getDetailedAnalyticsUsers,
 } from '../controllers/adminAnalyticsController';
 import { protect, requireVerified } from '../middleware/auth';
@@ -54,6 +55,15 @@ router.get(
     requireVerified,
     requireRole(UserRole.ADMIN),
     getDetailedAnalyticsJobs,
+);
+
+// Get detailed referral analytics
+router.get(
+    '/referrals-analytics',
+    protect,
+    requireVerified,
+    requireRole(UserRole.ADMIN),
+    getDetailedAnalyticsReferrals,
 );
 
 export default router;
