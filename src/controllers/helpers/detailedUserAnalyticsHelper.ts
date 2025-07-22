@@ -10,7 +10,7 @@ import {
 type Department = 'AIDS' | 'CSE' | 'ECE';
 
 interface BatchAnalytics {
-    batch: string;
+    batch: number;
     total: number;
     byRole: RoleDistribution;
     growth: {
@@ -48,7 +48,7 @@ interface RoleStats {
 }
 
 interface BatchResults {
-    _id: string;
+    _id: number;
     roles: RoleStats[];
     total: number;
 }
@@ -93,11 +93,10 @@ export const getBatchAnalytics = async (
     const baseFilter = roleFilter ? { role: roleFilter } : {};
     const sevenDaysAgo = now.minus({ days: 7 }).toJSDate();
     const thirtyDaysAgo = now.minus({ days: 30 }).toJSDate();
-    const currentYear = now.year;
-    const batchYears = Array.from(
-        { length: currentYear + 5 - 2014 + 1 },
-        (_, i) => (2014 + i).toString(),
-    );
+
+    const batchQuery = roleFilter ? { role: roleFilter } : {};
+    const uniqueBatches = await User.distinct('batch', batchQuery);
+    const batchYears = uniqueBatches.sort((a, b) => a - b);
 
     const pipeline: PipelineStage[] = [
         {
@@ -217,7 +216,11 @@ export const getDepartmentAnalytics = async (
     const baseFilter = roleFilter ? { role: roleFilter } : {};
     const sevenDaysAgo = now.minus({ days: 7 }).toJSDate();
     const thirtyDaysAgo = now.minus({ days: 30 }).toJSDate();
-    const departments: Department[] = ['AIDS', 'CSE', 'ECE'];
+
+    // Get unique departments from DB
+    const departments = (
+        await User.distinct('department')
+    ).sort() as Department[];
 
     const pipeline: PipelineStage[] = [
         {
