@@ -171,9 +171,6 @@ export const getAllJobPostings = async (
         }
 
         const search = req.query.search as string;
-        let posterNameFilter: any = {};
-        let jobs: any[] = [];
-        let total = 0;
         if (search) {
             const searchRegex = { $regex: search, $options: 'i' };
 
@@ -193,7 +190,7 @@ export const getAllJobPostings = async (
             sort = { [dateField]: -1 };
         }
 
-        [jobs, total] = await Promise.all([
+        const [jobs, total] = await Promise.all([
             JobPosting.find(filters)
                 .populate({
                     path: 'postedBy',

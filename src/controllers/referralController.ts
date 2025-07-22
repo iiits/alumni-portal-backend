@@ -7,7 +7,6 @@ import {
     apiUnauthorized,
 } from '../utils/apiResponses';
 
-// Create referral
 export const createReferral = async (
     req: Request,
     res: Response,
@@ -31,23 +30,125 @@ export const createReferral = async (
     }
 };
 
-// Get all referrals
 export const getReferrals = async (
     req: Request,
     res: Response,
 ): Promise<void> => {
     try {
-        const referrals = await Referral.find()
-            .populate({
-                path: 'postedBy',
-                model: 'User',
-                localField: 'postedBy',
-                foreignField: 'id',
-                select: '-_id id name collegeEmail personalEmail',
-            })
-            .sort({ lastApplyDate: -1 });
+        let page = Math.max(1, parseInt(req.query.page as string) || 1);
+        let limit = Math.min(
+            100,
+            Math.max(1, parseInt(req.query.limit as string) || 10),
+        );
+        const skip = (page - 1) * limit;
 
-        apiSuccess(res, referrals, 'Referrals retrieved successfully');
+        const filters: any = {};
+        const now = new Date();
+
+        const minReferrals = req.query.minReferrals
+            ? Number(req.query.minReferrals)
+            : undefined;
+        const maxReferrals = req.query.maxReferrals
+            ? Number(req.query.maxReferrals)
+            : undefined;
+        if (minReferrals !== undefined || maxReferrals !== undefined) {
+            filters.numberOfReferrals = {};
+            if (minReferrals !== undefined)
+                filters.numberOfReferrals.$gte = minReferrals;
+            if (maxReferrals !== undefined)
+                filters.numberOfReferrals.$lte = maxReferrals;
+        }
+
+        const startMonthYear = req.query.startMonthYear as string;
+        const endMonthYear = req.query.endMonthYear as string;
+        const dateField =
+            req.query.dateField === 'postedOn' ? 'postedOn' : 'lastApplyDate';
+        let startDate: Date | undefined;
+        let endDate: Date | undefined;
+
+        if (startMonthYear) {
+            const [startMonth, startYear] = startMonthYear.split('-');
+            startDate = new Date(`${startMonth} 1, ${startYear}`);
+        }
+        if (endMonthYear) {
+            const [endMonth, endYear] = endMonthYear.split('-');
+            endDate = new Date(`${endMonth} 1, ${endYear}`);
+            endDate = new Date(
+                endDate.getFullYear(),
+                endDate.getMonth() + 1,
+                0,
+                23,
+                59,
+                59,
+            );
+        }
+
+        if (startDate && endDate) {
+            filters[dateField] = { $gte: startDate, $lte: endDate };
+        } else if (startDate) {
+            filters[dateField] = { $gte: startDate };
+        } else if (endDate) {
+            filters[dateField] = { $lte: endDate };
+        } else {
+            filters.lastApplyDate = { $gte: now };
+        }
+
+        const search = req.query.search as string;
+        if (search) {
+            const searchRegex = { $regex: search, $options: 'i' };
+            const matchedUsers = await (await import('../models/User')).default
+                .find({ name: searchRegex })
+                .select('id');
+            const matchedUserIds = matchedUsers.map(u => u.id);
+            filters.$or = [
+                { 'jobDetails.company': searchRegex },
+                { 'jobDetails.role': searchRegex },
+                { postedBy: { $in: matchedUserIds } },
+            ];
+        }
+
+        let sort: any = { [dateField]: 1 };
+        if (endDate && !startDate) {
+            sort = { [dateField]: -1 };
+        }
+
+        const [referrals, total] = await Promise.all([
+            Referral.find(filters)
+                .populate({
+                    path: 'postedBy',
+                    model: 'User',
+                    localField: 'postedBy',
+                    foreignField: 'id',
+                    select: '-_id id name collegeEmail personalEmail',
+                })
+                .sort(sort)
+                .skip(skip)
+                .limit(limit)
+                .select(
+                    'id isActive numberOfReferrals jobDetails postedBy postedOn lastApplyDate -_id',
+                )
+                .lean(),
+            Referral.countDocuments(filters),
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+        if (totalPages > 0 && page > totalPages) {
+            page = totalPages;
+        }
+
+        apiSuccess(
+            res,
+            {
+                referrals,
+                pagination: {
+                    total,
+                    totalPages,
+                    currentPage: page,
+                    perPage: limit,
+                },
+            },
+            'Referrals retrieved successfully',
+        );
     } catch (error) {
         apiError(
             res,
@@ -58,7 +159,6 @@ export const getReferrals = async (
     }
 };
 
-// Get all referrals with filters
 export const getFilteredReferrals = async (
     req: Request,
     res: Response,
@@ -81,7 +181,6 @@ export const getFilteredReferrals = async (
             }
 
             if (month) {
-                // Month and Year filtering
                 const monthNum = parseInt(month as string);
                 if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
                     throw new Error('Invalid month. Must be between 1 and 12');
@@ -107,7 +206,6 @@ export const getFilteredReferrals = async (
                     ],
                 };
             } else {
-                // Year only filtering
                 const startDate = new Date(yearNum, 0, 1);
                 const endDate = new Date(yearNum, 11, 31, 23, 59, 59);
 
@@ -129,7 +227,6 @@ export const getFilteredReferrals = async (
                 };
             }
         } else {
-            // Default: Show upcoming referrals
             query = {
                 lastApplyDate: { $gte: new Date() },
             };
@@ -159,7 +256,6 @@ export const getFilteredReferrals = async (
     }
 };
 
-// Get user's referrals
 export const getUserReferrals = async (
     req: Request,
     res: Response,
@@ -168,7 +264,6 @@ export const getUserReferrals = async (
         const userId = req.user?.id;
         const requestedUserId = req.params.userId;
 
-        // Check if user is requesting their own referrals or is admin
         if (userId !== requestedUserId && req.user?.role !== 'admin') {
             apiUnauthorized(
                 res,
@@ -198,7 +293,6 @@ export const getUserReferrals = async (
     }
 };
 
-// Update referral
 export const updateReferral = async (
     req: Request,
     res: Response,
@@ -217,7 +311,6 @@ export const updateReferral = async (
             return;
         }
 
-        // Apply updates and save
         Object.assign(existingReferral, req.body);
 
         const updatedReferral = await existingReferral.save();
@@ -241,7 +334,6 @@ export const updateReferral = async (
     }
 };
 
-// Delete referral
 export const deleteReferral = async (
     req: Request,
     res: Response,

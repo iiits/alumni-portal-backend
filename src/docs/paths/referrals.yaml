@@ -6,6 +6,52 @@ paths:
             summary: Get all referrals (Admin only)
             security:
                 - bearerAuth: []
+            parameters:
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      minimum: 1
+                      default: 1
+                  description: Page number for pagination
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      minimum: 1
+                      default: 10
+                  description: Number of items per page
+                - in: query
+                  name: minReferrals
+                  schema:
+                      type: integer
+                  description: 'Minimum number of referrals'
+                - in: query
+                  name: maxReferrals
+                  schema:
+                      type: integer
+                  description: 'Maximum number of referrals'
+                - in: query
+                  name: startMonthYear
+                  schema:
+                      type: string
+                  description: 'Start month-year pair (e.g., Jan-2025)'
+                - in: query
+                  name: endMonthYear
+                  schema:
+                      type: string
+                  description: 'End month-year pair (e.g., Mar-2025)'
+                - in: query
+                  name: dateField
+                  schema:
+                      type: string
+                      enum: [postedOn, lastApplyDate]
+                  description: 'Which date field to use for range filtering (default: lastApplyDate)'
+                - in: query
+                  name: search
+                  schema:
+                      type: string
+                  description: 'Search term for company, role, or poster name'
             responses:
                 200:
                     description: Referrals retrieved successfully
@@ -17,9 +63,25 @@ paths:
                                     success:
                                         type: boolean
                                     data:
-                                        type: array
-                                        items:
-                                            $ref: '#/components/schemas/JobReferral'
+                                        type: object
+                                        properties:
+                                            referrals:
+                                                type: array
+                                                items:
+                                                    $ref: '#/components/schemas/JobReferral'
+                                            pagination:
+                                                type: object
+                                                properties:
+                                                    total:
+                                                        type: integer
+                                                    totalPages:
+                                                        type: integer
+                                                    currentPage:
+                                                        type: integer
+                                                    perPage:
+                                                        type: integer
+                                    message:
+                                        type: string
                 401:
                     description: Not authorized
 
