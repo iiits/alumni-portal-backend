@@ -1113,101 +1113,81 @@ paths:
                     description: Forbidden - Invalid role or unverified user
                 500:
                     description: Internal server error
-components:
-    schemas:
-        UserAnalyticsOverview:
-            type: object
-            properties:
-                total:
-                    type: number
-                    example: 1000
-                byRole:
-                    type: object
-                    properties:
-                        admin:
-                            type: number
-                            example: 20
-                        alumni:
-                            type: number
-                            example: 700
-                        student:
-                            type: number
-                            example: 280
-                growth:
-                    type: object
-                    properties:
-                        1d:
-                            type: object
-                            properties:
-                                rate:
-                                    type: number
-                                    example: 2.5
-                                count:
-                                    type: number
-                                    example: 10
-                        7d:
-                            type: object
-                            properties:
-                                rate:
-                                    type: number
-                                    example: 15
-                                count:
-                                    type: number
-                                    example: 50
-                        30d:
-                            type: object
-                            properties:
-                                rate:
-                                    type: number
-                                    example: 25
-                                count:
-                                    type: number
-                                    example: 200
-                timeline:
-                    type: object
-                    properties:
-                        1d:
-                            type: array
-                            items:
+
+    /admin/contacts-analytics:
+        get:
+            tags:
+                - Admin Analytics
+            summary: Get detailed contact analytics
+            description: Get analytics data for contact forms including total, resolved, unresolved counts, and time series for the last 7 and 30 days.
+            security:
+                - bearerAuth: []
+            responses:
+                200:
+                    description: Detailed contact analytics retrieved successfully
+                    content:
+                        application/json:
+                            schema:
                                 type: object
                                 properties:
-                                    date:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        type: object
+                                        properties:
+                                            total:
+                                                type: number
+                                                example: 120
+                                            resolved:
+                                                type: number
+                                                example: 80
+                                            unresolved:
+                                                type: number
+                                                example: 40
+                                            timeline:
+                                                type: object
+                                                properties:
+                                                    7d:
+                                                        type: array
+                                                        items:
+                                                            type: object
+                                                            properties:
+                                                                date:
+                                                                    type: string
+                                                                    example: '2025-07-17'
+                                                                total:
+                                                                    type: number
+                                                                    example: 5
+                                                                resolved:
+                                                                    type: number
+                                                                    example: 3
+                                                                unresolved:
+                                                                    type: number
+                                                                    example: 2
+                                                    30d:
+                                                        type: array
+                                                        items:
+                                                            type: object
+                                                            properties:
+                                                                date:
+                                                                    type: string
+                                                                    example: '2025-07-01'
+                                                                total:
+                                                                    type: number
+                                                                    example: 2
+                                                                resolved:
+                                                                    type: number
+                                                                    example: 1
+                                                                unresolved:
+                                                                    type: number
+                                                                    example: 1
+                                    message:
                                         type: string
-                                        example: '14:00'
-                                        description: 'Hour in UTC (HH:00 format)'
-                                    count:
-                                        type: number
-                                        example: 5
-                        7d:
-                            type: array
-                            items:
-                                type: object
-                                properties:
-                                    date:
-                                        type: string
-                                        example: '2025-07-15'
-                                        description: 'UTC date (YYYY-MM-DD format)'
-                                    count:
-                                        type: number
-                                        example: 5
-                        30d:
-                            type: array
-                            items:
-                                type: object
-                                properties:
-                                    date:
-                                        type: string
-                                        example: '2025-06-22'
-                                        description: 'UTC date (YYYY-MM-DD format)'
-                                    count:
-                                        type: number
-                                        example: 15
-        TopLocation:
-            type: object
-            properties:
-                name:
-                    type: string
-                    example: 'San Francisco'
-                count:
-                    type: number
-                    example: 10
+                                        example: 'Detailed contact analytics retrieved successfully'
+                401:
+                    description: Unauthorized - No token provided
+                403:
+                    description: Forbidden - Invalid role or unverified user
+                500:
+                    description: Internal server error

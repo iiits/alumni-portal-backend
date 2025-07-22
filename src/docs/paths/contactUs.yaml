@@ -49,9 +49,49 @@ paths:
             tags:
                 - Contact
             summary: Get all contact forms
-            description: Retrieve all contact form submissions (admin only)
+            description: Retrieve all contact form submissions (admin only) withdate range filter and search by user name/email.
             security:
                 - bearerAuth: []
+            parameters:
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      minimum: 1
+                      default: 1
+                  description: Page number for pagination
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      minimum: 1
+                      default: 10
+                  description: Number of items per page
+                - in: query
+                  name: startDate
+                  schema:
+                      type: string
+                      format: date
+                      example: '2025-07-01'
+                  description: Filter contact forms created after this date (inclusive)
+                - in: query
+                  name: endDate
+                  schema:
+                      type: string
+                      format: date
+                      example: '2025-07-23'
+                  description: Filter contact forms created before this date (inclusive)
+                - in: query
+                  name: search
+                  schema:
+                      type: string
+                      example: 'John Doe'
+                  description: Search by user name or email (case-insensitive)
+                - in: query
+                  name: resolved
+                  schema:
+                      type: boolean
+                  description: Filter by resolution state (true for resolved, false for unresolved)
             responses:
                 200:
                     description: Contact forms retrieved successfully
@@ -69,12 +109,28 @@ paths:
                                                 type: array
                                                 items:
                                                     $ref: '#/components/schemas/ContactUs'
+                                            pagination:
+                                                type: object
+                                                properties:
+                                                    total:
+                                                        type: integer
+                                                        example: 120
+                                                    totalPages:
+                                                        type: integer
+                                                        example: 12
+                                                    currentPage:
+                                                        type: integer
+                                                        example: 1
+                                                    perPage:
+                                                        type: integer
+                                                        example: 10
                                     message:
                                         type: string
                 401:
                     description: Not authenticated
                 500:
                     description: Server error
+
     /contactus/user:
         get:
             tags:
@@ -120,12 +176,61 @@ paths:
                 500:
                     description: Server error
 
+    /contactus/respond:
+        post:
+            tags:
+                - Contact
+            summary: Respond to a contact form query
+            description: Admin responds to a contact form query by UUID, sends an email to the original sender, and marks the query as resolved.
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - id
+                                - subject
+                                - message
+                            properties:
+                                id:
+                                    type: string
+                                    example: 'c1a2b3d4-5678-90ab-cdef-1234567890ab'
+                                subject:
+                                    type: string
+                                    example: 'Follow-up on Alumni Meet Query'
+                                message:
+                                    type: string
+                                    example: 'Thank you for your query. Here are the details...'
+            responses:
+                200:
+                    description: Response sent and query marked as resolved
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    message:
+                                        type: string
+                                        example: 'Response sent and query marked as resolved'
+                400:
+                    description: Missing required fields or query already resolved
+                404:
+                    description: Contact query not found
+                500:
+                    description: Server error
+
 components:
     schemas:
         Contact:
             type: object
             properties:
-                _id:
+                id:
                     type: string
                 user:
                     type: string
@@ -137,6 +242,8 @@ components:
                     type: string
                 message:
                     type: string
+                resolved:
+                    type: boolean
                 createdAt:
                     type: string
                     format: date-time

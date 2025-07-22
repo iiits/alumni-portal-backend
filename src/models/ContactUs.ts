@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import mongoose, { Document } from 'mongoose';
 
 export interface IContact extends Document {
@@ -11,6 +12,12 @@ export interface IContact extends Document {
 }
 
 const ContactSchema = new mongoose.Schema<IContact>({
+    id: {
+        type: String,
+        default: () => crypto.randomUUID(),
+        unique: true,
+        index: true,
+    },
     user: {
         type: String,
         ref: 'User',

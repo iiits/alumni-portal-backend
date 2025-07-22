@@ -2,6 +2,7 @@ import express from 'express';
 import {
     getAllContactForms,
     getContactFormForUser,
+    respondToContactQuery,
     submitContactForm,
 } from '../controllers/contactController';
 import { protect } from '../middleware/auth';
@@ -21,6 +22,14 @@ router.get(
     protect,
     requireRole(UserRole.STUDENT),
     getContactFormForUser,
+);
+
+// Respond to a contact query (admin only)
+router.post(
+    '/respond',
+    protect,
+    requireRole(UserRole.ADMIN),
+    respondToContactQuery,
 );
 
 export default router;

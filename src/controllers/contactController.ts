@@ -1,7 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import ContactUs from '../models/ContactUs';
 import User from '../models/User';
-import { sendContactUsEmail } from '../services/email/emailServices';
+import {
+    sendContactResponseEmail,
+    sendContactUsEmail,
+} from '../services/email/emailServices';
 import { apiError, apiNotFound, apiSuccess } from '../utils/apiResponses';
 
 export const submitContactForm = async (
@@ -80,10 +83,71 @@ export const getAllContactForms = async (
     next: NextFunction,
 ): Promise<void> => {
     try {
-        const contactForms = await ContactUs.find().sort({ createdAt: -1 });
+        let page = Math.max(1, parseInt(req.query.page as string) || 1);
+        let limit = Math.min(
+            100,
+            Math.max(1, parseInt(req.query.limit as string) || 10),
+        );
+        const skip = (page - 1) * limit;
+
+        const filters: any = {};
+        const now = new Date();
+
+        const startDateStr = req.query.startDate as string;
+        const endDateStr = req.query.endDate as string;
+        let startDate: Date | undefined;
+        let endDate: Date | undefined;
+        if (startDateStr) {
+            startDate = new Date(startDateStr);
+        }
+        if (endDateStr) {
+            endDate = new Date(endDateStr);
+            endDate.setHours(23, 59, 59, 999);
+        }
+        if (startDate && endDate) {
+            filters.createdAt = { $gte: startDate, $lte: endDate };
+        } else if (startDate) {
+            filters.createdAt = { $gte: startDate };
+        } else if (endDate) {
+            filters.createdAt = { $lte: endDate };
+        }
+
+        if (typeof req.query.resolved !== 'undefined') {
+            filters.resolved = req.query.resolved === 'true';
+        }
+
+        const search = req.query.search as string;
+        if (search) {
+            const searchRegex = { $regex: search, $options: 'i' };
+            filters.$or = [{ name: searchRegex }, { email: searchRegex }];
+        }
+
+        const [contactForms, total] = await Promise.all([
+            ContactUs.find(filters)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .select('-__v')
+                .lean(),
+            ContactUs.countDocuments(filters),
+        ]);
+
+        const totalPages = Math.ceil(total / limit);
+        if (totalPages > 0 && page > totalPages) {
+            page = totalPages;
+        }
+
         apiSuccess(
             res,
-            { contactForms },
+            {
+                contactForms,
+                pagination: {
+                    total,
+                    totalPages,
+                    currentPage: page,
+                    perPage: limit,
+                },
+            },
             'Contact forms retrieved successfully',
             200,
         );
@@ -118,5 +182,55 @@ export const getContactFormForUser = async (
     } catch (error) {
         console.error('Error getting contact forms:', error);
         apiError(res, 'Failed to get contact forms', 500);
+    }
+};
+
+export const respondToContactQuery = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+): Promise<void> => {
+    const { id, subject, message } = req.body;
+    if (!id || !subject || !message) {
+        apiError(res, 'id, subject, and message are required', 400);
+        return;
+    }
+    try {
+        const contactQuery = await ContactUs.findOne({ id });
+        if (!contactQuery) {
+            apiNotFound(res, 'Contact query not found');
+            return;
+        }
+
+        if (contactQuery.resolved) {
+            apiError(res, 'Query already resolved', 400);
+            return;
+        }
+
+        const success = await sendContactResponseEmail(
+            contactQuery.email,
+            contactQuery.name,
+            contactQuery.subject,
+            contactQuery.message,
+            message,
+            contactQuery.createdAt.toISOString(),
+        );
+
+        if (!success) {
+            apiError(res, 'Failed to send response email', 500);
+            return;
+        }
+
+        contactQuery.resolved = true;
+        await contactQuery.save();
+        apiSuccess(
+            res,
+            null,
+            'Response sent and query marked as resolved',
+            200,
+        );
+    } catch (error) {
+        console.error('Error responding to contact query:', error);
+        apiError(res, 'Failed to respond to contact query', 500);
     }
 };
