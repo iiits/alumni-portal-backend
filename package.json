@@ -19,7 +19,7 @@
         "start": "node dist/index.js",
         "dev": "nodemon src/index.ts",
         "prepare": "npx husky",
-        "format": "prettier --write --ignore-unknown \"src/*\""
+        "format": "prettier --write --ignore-unknown \"src/**/*.ts\""
     },
     "dependencies": {
         "@types/js-yaml": "^4.0.9",

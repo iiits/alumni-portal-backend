@@ -259,3 +259,239 @@ paths:
                     description: Forbidden - Invalid role or unverified user
                 500:
                     description: Internal server error
+    /admin/users-analytics:
+        get:
+            tags:
+                - Admin Analytics
+            summary: Get detailed user analytics
+            description: Get detailed analytics data for users including batch-wise and department-wise statistics, and unverified user details
+            security:
+                - bearerAuth: []
+            responses:
+                200:
+                    description: Detailed user analytics retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        type: object
+                                        properties:
+                                            overview:
+                                                type: object
+                                                properties:
+                                                    total:
+                                                        type: number
+                                                        example: 1000
+                                                    byRole:
+                                                        type: object
+                                                        properties:
+                                                            admin:
+                                                                type: number
+                                                                example: 20
+                                                            alumni:
+                                                                type: number
+                                                                example: 700
+                                                            student:
+                                                                type: number
+                                                                example: 280
+                                                    growth:
+                                                        type: object
+                                                        properties:
+                                                            1d:
+                                                                type: object
+                                                                properties:
+                                                                    rate:
+                                                                        type: number
+                                                                        example: 2.5
+                                                                    count:
+                                                                        type: number
+                                                                        example: 10
+                                                            7d:
+                                                                type: object
+                                                                properties:
+                                                                    rate:
+                                                                        type: number
+                                                                        example: 15
+                                                                    count:
+                                                                        type: number
+                                                                        example: 50
+                                                            30d:
+                                                                type: object
+                                                                properties:
+                                                                    rate:
+                                                                        type: number
+                                                                        example: 25
+                                                                    count:
+                                                                        type: number
+                                                                        example: 200
+                                                    timeline:
+                                                        type: object
+                                                        properties:
+                                                            1d:
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        date:
+                                                                            type: string
+                                                                            example: '14:00'
+                                                                            description: 'Hour in UTC (HH:00 format)'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 5
+                                                            7d:
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        date:
+                                                                            type: string
+                                                                            example: '2025-07-15'
+                                                                            description: 'UTC date (YYYY-MM-DD format)'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 5
+                                                            30d:
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        date:
+                                                                            type: string
+                                                                            example: '2025-06-22'
+                                                                            description: 'UTC date (YYYY-MM-DD format)'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 15
+                                            byBatch:
+                                                type: array
+                                                items:
+                                                    type: object
+                                                    properties:
+                                                        batch:
+                                                            type: string
+                                                            example: '2025'
+                                                        total:
+                                                            type: number
+                                                            example: 250
+                                                        byRole:
+                                                            type: object
+                                                            properties:
+                                                                admin:
+                                                                    type: number
+                                                                    example: 5
+                                                                alumni:
+                                                                    type: number
+                                                                    example: 0
+                                                                student:
+                                                                    type: number
+                                                                    example: 245
+                                                        growth:
+                                                            type: object
+                                                            properties:
+                                                                7d:
+                                                                    type: object
+                                                                    properties:
+                                                                        rate:
+                                                                            type: number
+                                                                            example: 10
+                                                                        count:
+                                                                            type: number
+                                                                            example: 25
+                                                                30d:
+                                                                    type: object
+                                                                    properties:
+                                                                        rate:
+                                                                            type: number
+                                                                            example: 40
+                                                                        count:
+                                                                            type: number
+                                                                            example: 100
+                                            byDepartment:
+                                                type: array
+                                                items:
+                                                    type: object
+                                                    properties:
+                                                        department:
+                                                            type: string
+                                                            example: 'CSE'
+                                                        total:
+                                                            type: number
+                                                            example: 400
+                                                        byRole:
+                                                            type: object
+                                                            properties:
+                                                                admin:
+                                                                    type: number
+                                                                    example: 8
+                                                                alumni:
+                                                                    type: number
+                                                                    example: 250
+                                                                student:
+                                                                    type: number
+                                                                    example: 142
+                                                        growth:
+                                                            type: object
+                                                            properties:
+                                                                7d:
+                                                                    type: object
+                                                                    properties:
+                                                                        rate:
+                                                                            type: number
+                                                                            example: 5
+                                                                        count:
+                                                                            type: number
+                                                                            example: 20
+                                                                30d:
+                                                                    type: object
+                                                                    properties:
+                                                                        rate:
+                                                                            type: number
+                                                                            example: 20
+                                                                        count:
+                                                                            type: number
+                                                                            example: 80
+                                            unverified:
+                                                type: object
+                                                properties:
+                                                    total:
+                                                        type: number
+                                                        example: 50
+                                                    users:
+                                                        type: array
+                                                        items:
+                                                            type: object
+                                                            properties:
+                                                                name:
+                                                                    type: string
+                                                                    example: 'John Doe'
+                                                                collegeEmail:
+                                                                    type: string
+                                                                    example: 'john.doe@example.com'
+                                                                batch:
+                                                                    type: string
+                                                                    example: '2025'
+                                                                department:
+                                                                    type: string
+                                                                    example: 'CSE'
+                                                                role:
+                                                                    type: string
+                                                                    example: 'student'
+                                                                createdAt:
+                                                                    type: string
+                                                                    format: date-time
+                                                                    example: '2025-07-20T10:30:00Z'
+                                    message:
+                                        type: string
+                                        example: 'Detailed user analytics retrieved successfully'
+                401:
+                    description: Unauthorized - No token provided
+                403:
+                    description: Forbidden - Invalid role or unverified user
+                500:
+                    description: Internal server error

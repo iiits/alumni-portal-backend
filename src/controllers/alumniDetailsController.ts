@@ -12,7 +12,7 @@ export const createAlumniDetails = async (
 ): Promise<void> => {
     try {
         const userId = req.user?.id;
-        const { jobPosition, education,...rest } = req.body;
+        const { jobPosition, education, ...rest } = req.body;
 
         const formattedJobPosition = jobPosition.map((job: any) => ({
             ...job,
@@ -37,7 +37,10 @@ export const createAlumniDetails = async (
             education: formattedEducation,
         });
 
-        await User.updateOne({ id: userId }, { alumniDetails: createdAlumni.id, role: "alumni" });
+        await User.updateOne(
+            { id: userId },
+            { alumniDetails: createdAlumni.id, role: 'alumni' },
+        );
 
         const emailSent = await sendAlumniVerificationEmail(userId, name);
         if (!emailSent) {
@@ -132,7 +135,7 @@ export const updateAlumniDetails = async (
         };
 
         const alumniDetails = await AlumniDetails.findOneAndUpdate(
-            {id},
+            { id },
             updateData,
             { new: true, runValidators: true },
         );
