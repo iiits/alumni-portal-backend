@@ -5,6 +5,7 @@ import {
     getAlumniDetails,
     getAlumniDetailsById,
     updateAlumniDetails,
+    verifyAlumniDetails,
 } from '../controllers/alumniDetailsController';
 import { protect, requireVerified } from '../middleware/auth';
 import { requireRole, UserRole } from '../middleware/rbac';
@@ -47,6 +48,15 @@ router.delete(
     requireVerified,
     requireRole(UserRole.ADMIN),
     deleteAlumniDetails,
+);
+
+// Toggle alumni verification status
+router.patch(
+    '/:id/verify/:verified',
+    protect,
+    requireRole(UserRole.ADMIN),
+    requireVerified,
+    verifyAlumniDetails,
 );
 
 export default router;

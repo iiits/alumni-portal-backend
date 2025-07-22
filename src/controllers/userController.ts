@@ -23,6 +23,8 @@ interface UserFilters {
 // Get all users with filters and pagination
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
     try {
+        let maxYear = new Date().getFullYear() + 5;
+
         // Validate and parse pagination params
         let page = Math.max(1, parseInt(req.query.page as string) || 1);
         let limit = Math.min(
@@ -50,7 +52,7 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
             const batchNumbers = (req.query.batch as string)
                 .split(',')
                 .map(Number)
-                .filter(num => !isNaN(num) && num >= 2014 && num <= 2030);
+                .filter(num => !isNaN(num) && num >= 2014 && num <= maxYear);
             if (batchNumbers.length) {
                 filters.batch = { $in: batchNumbers };
             }
