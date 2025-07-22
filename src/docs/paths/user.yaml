@@ -7,6 +7,46 @@ paths:
             description: Admin only - retrieve all users with filtered fields
             security:
                 - bearerAuth: []
+            parameters:
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      minimum: 1
+                      default: 1
+                  description: Page number for pagination
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      minimum: 1
+                      default: 10
+                  description: Number of items per page
+                - in: query
+                  name: search
+                  schema:
+                      type: string
+                  description: Search term to filter users by name or email
+                - in: query
+                  name: batch
+                  schema:
+                      type: string
+                  description: Comma-separated list of batch years (2014-2030)
+                - in: query
+                  name: department
+                  schema:
+                      type: string
+                  description: Comma-separated list of departments (AIDS, CSE, ECE)
+                - in: query
+                  name: role
+                  schema:
+                      type: string
+                  description: Comma-separated list of roles (admin, alumni, student)
+                - in: query
+                  name: verified
+                  schema:
+                      type: boolean
+                  description: Filter by email verification status
             responses:
                 200:
                     description: Users retrieved successfully
@@ -19,9 +59,31 @@ paths:
                                         type: boolean
                                         example: true
                                     data:
-                                        type: array
-                                        items:
-                                            $ref: '#/components/schemas/User'
+                                        type: object
+                                        properties:
+                                            users:
+                                                type: array
+                                                items:
+                                                    $ref: '#/components/schemas/User'
+                                            pagination:
+                                                type: object
+                                                properties:
+                                                    total:
+                                                        type: integer
+                                                        description: Total number of users matching the filters
+                                                        example: 100
+                                                    page:
+                                                        type: integer
+                                                        description: Current page number
+                                                        example: 1
+                                                    limit:
+                                                        type: integer
+                                                        description: Number of items per page
+                                                        example: 10
+                                                    totalPages:
+                                                        type: integer
+                                                        description: Total number of pages
+                                                        example: 10
                                     message:
                                         type: string
                                         example: 'Users retrieved successfully'
@@ -175,6 +237,69 @@ paths:
                                     message:
                                         type: string
                                         example: 'User deleted successfully'
+                401:
+                    description: Not authorized
+                403:
+                    description: Email not verified or insufficient role
+                404:
+                    description: User not found
+                500:
+                    description: Server error
+
+    /users/admin/{id}:
+        patch:
+            tags:
+                - Users
+            summary: Admin update user
+            description: Admin only - update sensitive user information like role and verification status
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                  description: User ID
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                role:
+                                    type: string
+                                    enum: [admin, alumni, student]
+                                    description: User's role in the system
+                                verified:
+                                    type: boolean
+                                    description: Email verification status
+                                department:
+                                    type: string
+                                    enum: [AIDS, CSE, ECE]
+                                    description: User's department
+                                batch:
+                                    type: integer
+                                    minimum: 2014
+                                    maximum: 2030
+                                    description: User's batch year
+            responses:
+                200:
+                    description: User updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        $ref: '#/components/schemas/User'
+                                    message:
+                                        type: string
+                                        example: 'User updated successfully'
                 401:
                     description: Not authorized
                 403:
