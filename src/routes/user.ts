@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+    adminUpdateUser,
     deleteUser,
     getMyProfile,
     getUserById,
@@ -41,6 +42,15 @@ router.put(
     requireVerified,
     requireRole(UserRole.STUDENT),
     updateUser,
+);
+
+// Admin route to update sensitive user information
+router.patch(
+    '/admin/:id',
+    protect,
+    requireVerified,
+    requireRole(UserRole.ADMIN),
+    adminUpdateUser,
 );
 
 router.delete(

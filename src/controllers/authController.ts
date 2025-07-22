@@ -220,10 +220,15 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         }
 
         // Find user based on detected field
-        const user = await User.findOne(query).select('+password');
+        const user = await User.findOne(query).select('+password +verified');
 
         if (!user) {
             apiUnauthorized(res, 'Invalid credentials');
+            return;
+        }
+
+        if (!user.verified) {
+            apiUnauthorized(res, 'Email not verified');
             return;
         }
 
