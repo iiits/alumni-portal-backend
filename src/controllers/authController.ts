@@ -370,7 +370,7 @@ export const getMe = async (
     next: NextFunction,
 ): Promise<void> => {
     try {
-        const user = await User.findOne({ id: req.user.id }).select(
+        const user = await User.findOne({ id: req.user?.id }).select(
             '-password -verified -__v',
         ); // Exclude sensitive fields
 

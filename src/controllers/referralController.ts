@@ -207,7 +207,7 @@ export const updateReferral = async (
         const existingReferral = await Referral.findOne({
             id: req.params.id,
             $or: [
-                { postedBy: req.user.id },
+                { postedBy: req.user?.id },
                 { $expr: { $eq: [req.user.role, 'admin'] } },
             ],
         });
@@ -250,7 +250,7 @@ export const deleteReferral = async (
         const referral = await Referral.findOneAndDelete({
             id: req.params.id,
             $or: [
-                { postedBy: req.user.id },
+                { postedBy: req.user?.id },
                 { $expr: { $eq: [req.user.role, 'admin'] } },
             ],
         });

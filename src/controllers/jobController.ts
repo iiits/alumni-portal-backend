@@ -181,7 +181,7 @@ export const updateJobPosting = async (
         const existingJob = await JobPosting.findOne({
             id: req.params.id,
             $or: [
-                { postedBy: req.user.id },
+                { postedBy: req.user?.id },
                 { $expr: { $eq: [req.user.role, 'admin'] } },
             ],
         });
@@ -224,7 +224,7 @@ export const deleteJobPosting = async (
         const job = await JobPosting.findOneAndDelete({
             id: req.params.id,
             $or: [
-                { postedBy: req.user.id },
+                { postedBy: req.user?.id },
                 { $expr: { $eq: [req.user.role, 'admin'] } },
             ],
         });

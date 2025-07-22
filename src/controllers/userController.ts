@@ -216,7 +216,7 @@ export const updateUser = async (
 ): Promise<void> => {
     try {
         // Only allow users to update their own profile unless admin
-        if (req.user.id !== req.params.id && req.user.role !== 'admin') {
+        if (req.user?.id !== req.params.id && req.user.role !== 'admin') {
             apiUnauthorized(res, 'Not authorized to update this profile');
             return;
         }
@@ -359,7 +359,7 @@ export const deleteUser = async (
 ): Promise<void> => {
     try {
         // Only allow users to delete their own profile unless admin
-        if (req.user.id !== req.params.id && req.user.role !== 'admin') {
+        if (req.user?.id !== req.params.id && req.user.role !== 'admin') {
             apiUnauthorized(res, 'Not authorized to delete this profile');
             return;
         }

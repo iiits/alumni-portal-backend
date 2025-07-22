@@ -92,7 +92,7 @@ export const createEvent = async (
 
         const event = new Event({
             ...req.body,
-            postedBy: req.user.id,
+            postedBy: req.user?.id,
         });
 
         await event.save();
