@@ -39,8 +39,44 @@ paths:
             tags:
                 - Alumni Details
             summary: Get all alumni details
+            description: Admin only - retrieve all users with filtered fields
             security:
                 - bearerAuth: []
+            parameters:
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      minimum: 1
+                      default: 1
+                  description: Page number for pagination
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      minimum: 1
+                      default: 10
+                  description: Number of items per page
+                - in: query
+                  name: search
+                  schema:
+                      type: string
+                  description: Search term to filter users by name or email
+                - in: query
+                  name: batch
+                  schema:
+                      type: string
+                  description: Comma-separated list of batch years (2014-2030)
+                - in: query
+                  name: department
+                  schema:
+                      type: string
+                  description: Comma-separated list of departments (AIDS, CSE, ECE)
+                - in: query
+                  name: verified
+                  schema:
+                      type: boolean
+                  description: Filter by alumni verification status
             responses:
                 200:
                     description: Alumni details retrieved successfully
@@ -180,6 +216,52 @@ paths:
                     description: Unauthorized - No token provided
                 403:
                     description: Forbidden - Invalid role or unverified user
+                404:
+                    description: Alumni details not found
+                500:
+                    description: Internal server error
+
+    /alumni-details/{id}/verify/{verified}:
+        patch:
+            tags:
+                - Alumni Details
+            summary: Toggle alumni verification status
+            description: Admin only - set alumni verification status to true or false
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the alumni details entry
+                - name: verified
+                  in: path
+                  required: true
+                  schema:
+                      type: boolean
+                  description: Verification status to set (true/false)
+            responses:
+                200:
+                    description: Alumni details verified successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        $ref: '#/components/schemas/AlumniDetails'
+                                    message:
+                                        type: string
+                                        example: 'Alumni details verified successfully'
+                401:
+                    description: Unauthorized - No token provided
+                403:
+                    description: Forbidden - Invalid role
                 404:
                     description: Alumni details not found
                 500:
