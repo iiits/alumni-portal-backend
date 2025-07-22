@@ -2,6 +2,7 @@ import express from 'express';
 import {
     getDashboardAnalytics,
     getDetailedAnalyticsAlumni,
+    getDetailedAnalyticsContacts,
     getDetailedAnalyticsEvents,
     getDetailedAnalyticsJobs,
     getDetailedAnalyticsReferrals,
@@ -64,6 +65,15 @@ router.get(
     requireVerified,
     requireRole(UserRole.ADMIN),
     getDetailedAnalyticsReferrals,
+);
+
+// Get detailed contact analytics
+router.get(
+    '/contacts-analytics',
+    protect,
+    requireVerified,
+    requireRole(UserRole.ADMIN),
+    getDetailedAnalyticsContacts,
 );
 
 export default router;

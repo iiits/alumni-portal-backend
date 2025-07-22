@@ -8,6 +8,7 @@ import {
     getUserAnalytics,
 } from './helpers/adminAnalyticsHelper';
 import { getAlumniAnalytics } from './helpers/alumniAnalyticsHelper';
+import { getContactAnalyticsDetailed } from './helpers/contactAnalyticsHelper';
 import { getDetailedUserAnalytics } from './helpers/detailedUserAnalyticsHelper';
 import { getEventAnalyticsDetailed } from './helpers/eventAnalyticsHelper';
 import { getJobAnalyticsDetailed } from './helpers/jobAnalyticsHelper';
@@ -159,6 +160,28 @@ export const getDetailedAnalyticsReferrals = async (
             error instanceof Error
                 ? error.message
                 : 'Failed to fetch detailed referral analytics',
+        );
+    }
+};
+
+// Get detailed contact analytics
+export const getDetailedAnalyticsContacts = async (
+    req: Request,
+    res: Response,
+): Promise<void> => {
+    try {
+        const detailedStats = await getContactAnalyticsDetailed();
+        apiSuccess(
+            res,
+            detailedStats,
+            'Detailed contact analytics retrieved successfully',
+        );
+    } catch (error) {
+        apiError(
+            res,
+            error instanceof Error
+                ? error.message
+                : 'Failed to fetch detailed contact analytics',
         );
     }
 };
