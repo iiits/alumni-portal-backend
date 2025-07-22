@@ -1,4 +1,5 @@
 import { transporter } from '../../config/email';
+import { renderAdminContactResponseEmail } from './templates/adminContactResponse';
 import { renderAlumniVerificationEmail } from './templates/alumniDetailsVerification';
 import { renderContactFormEmail } from './templates/contactUs';
 import { renderPasswordResetEmail } from './templates/passwordReset';
@@ -46,6 +47,29 @@ export const sendContactUsEmail = async (
         to: adminEmails.join(','),
         subject: `Contact Form Submission: ${subject}`,
         html: renderContactFormEmail(name, email, subject, message),
+    });
+};
+
+export const sendContactResponseEmail = async (
+    email: string,
+    name: string,
+    originalSubject: string,
+    originalMessage: string,
+    adminMessage: string,
+    date: string,
+) => {
+    const html = renderAdminContactResponseEmail(
+        name,
+        email,
+        originalSubject,
+        originalMessage,
+        adminMessage,
+        date,
+    );
+    return sendEmail({
+        to: email,
+        subject: `Response to your query: ${originalSubject}`,
+        html,
     });
 };
 
