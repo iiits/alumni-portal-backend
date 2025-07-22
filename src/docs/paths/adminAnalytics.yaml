@@ -848,3 +848,170 @@ paths:
                     description: Forbidden - Invalid role or unverified user
                 500:
                     description: Internal server error
+
+    /admin/jobs-analytics:
+        get:
+            tags:
+                - Admin Analytics
+            summary: Get detailed job analytics
+            description: Get detailed analytics data for jobs including group-wise statistics and top companies, roles & posters.
+            security:
+                - bearerAuth: []
+            responses:
+                200:
+                    description: Detailed job analytics retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: true
+                                    data:
+                                        type: object
+                                        properties:
+                                            total:
+                                                type: number
+                                                example: 100
+                                            future:
+                                                type: number
+                                                example: 60
+                                            past:
+                                                type: number
+                                                example: 40
+                                            typeStats:
+                                                type: object
+                                                properties:
+                                                    future:
+                                                        type: object
+                                                        properties:
+                                                            fulltime:
+                                                                type: number
+                                                                example: 30
+                                                            parttime:
+                                                                type: number
+                                                                example: 10
+                                                            internship:
+                                                                type: number
+                                                                example: 15
+                                                            others:
+                                                                type: number
+                                                                example: 5
+                                                    past:
+                                                        type: object
+                                                        properties:
+                                                            fulltime:
+                                                                type: number
+                                                                example: 20
+                                                            parttime:
+                                                                type: number
+                                                                example: 5
+                                                            internship:
+                                                                type: number
+                                                                example: 10
+                                                            others:
+                                                                type: number
+                                                                example: 5
+                                                    total:
+                                                        type: object
+                                                        properties:
+                                                            fulltime:
+                                                                type: number
+                                                                example: 50
+                                                            parttime:
+                                                                type: number
+                                                                example: 15
+                                                            internship:
+                                                                type: number
+                                                                example: 25
+                                                            others:
+                                                                type: number
+                                                                example: 10
+                                            workTypeStats:
+                                                type: object
+                                                properties:
+                                                    future:
+                                                        type: object
+                                                        properties:
+                                                            onsite:
+                                                                type: number
+                                                                example: 20
+                                                            remote:
+                                                                type: number
+                                                                example: 30
+                                                            hybrid:
+                                                                type: number
+                                                                example: 10
+                                                    past:
+                                                        type: object
+                                                        properties:
+                                                            onsite:
+                                                                type: number
+                                                                example: 10
+                                                            remote:
+                                                                type: number
+                                                                example: 20
+                                                            hybrid:
+                                                                type: number
+                                                                example: 10
+                                                    total:
+                                                        type: object
+                                                        properties:
+                                                            onsite:
+                                                                type: number
+                                                                example: 30
+                                                            remote:
+                                                                type: number
+                                                                example: 50
+                                                            hybrid:
+                                                                type: number
+                                                                example: 20
+                                            uniqueCompanies:
+                                                type: number
+                                                example: 25
+                                            topCompanies:
+                                                type: array
+                                                items:
+                                                    type: object
+                                                    properties:
+                                                        name:
+                                                            type: string
+                                                            example: 'Google'
+                                                        count:
+                                                            type: number
+                                                            example: 10
+                                            uniqueRoles:
+                                                type: number
+                                                example: 15
+                                            topRoles:
+                                                type: array
+                                                items:
+                                                    type: object
+                                                    properties:
+                                                        name:
+                                                            type: string
+                                                            example: 'Software Engineer'
+                                                        count:
+                                                            type: number
+                                                            example: 8
+                                            topPosters:
+                                                type: array
+                                                items:
+                                                    type: object
+                                                    properties:
+                                                        name:
+                                                            type: string
+                                                            example: 'admin123'
+                                                        count:
+                                                            type: number
+                                                            example: 5
+                                    message:
+                                        type: string
+                                        example: 'Detailed job analytics retrieved successfully'
+                401:
+                    description: Unauthorized - No token provided
+                403:
+                    description: Forbidden - Invalid role or unverified user
+                500:
+                    description: Internal server error
