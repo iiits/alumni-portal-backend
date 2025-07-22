@@ -3,6 +3,7 @@ import {
     getDashboardAnalytics,
     getDetailedAnalyticsAlumni,
     getDetailedAnalyticsEvents,
+    getDetailedAnalyticsJobs,
     getDetailedAnalyticsUsers,
 } from '../controllers/adminAnalyticsController';
 import { protect, requireVerified } from '../middleware/auth';
@@ -44,6 +45,15 @@ router.get(
     requireVerified,
     requireRole(UserRole.ADMIN),
     getDetailedAnalyticsEvents,
+);
+
+// Get detailed job analytics
+router.get(
+    '/jobs-analytics',
+    protect,
+    requireVerified,
+    requireRole(UserRole.ADMIN),
+    getDetailedAnalyticsJobs,
 );
 
 export default router;
