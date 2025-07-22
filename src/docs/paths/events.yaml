@@ -6,6 +6,41 @@ paths:
             summary: Get all events (Admin only)
             security:
                 - bearerAuth: []
+            parameters:
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      minimum: 1
+                      default: 1
+                  description: Page number for pagination
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      minimum: 1
+                      default: 10
+                  description: Number of items per page
+                - in: query
+                  name: startMonthYear
+                  schema:
+                      type: string
+                  description: 'Start month-year pair (e.g., Jan-2025)'
+                - in: query
+                  name: endMonthYear
+                  schema:
+                      type: string
+                  description: 'End month-year pair (e.g., Mar-2025)'
+                - in: query
+                  name: type
+                  schema:
+                      type: string
+                  description: 'Comma-separated event types to filter (e.g., alumni,college,club,others)'
+                - in: query
+                  name: search
+                  schema:
+                      type: string
+                  description: 'Search term for event name or venue'
             responses:
                 200:
                     description: Events retrieved successfully
@@ -17,9 +52,23 @@ paths:
                                     success:
                                         type: boolean
                                     data:
-                                        type: array
-                                        items:
-                                            $ref: '#/components/schemas/Event'
+                                        type: object
+                                        properties:
+                                            events:
+                                                type: array
+                                                items:
+                                                    $ref: '#/components/schemas/Event'
+                                            pagination:
+                                                type: object
+                                                properties:
+                                                    total:
+                                                        type: integer
+                                                    totalPages:
+                                                        type: integer
+                                                    currentPage:
+                                                        type: integer
+                                                    perPage:
+                                                        type: integer
                                     message:
                                         type: string
                 401:
