@@ -1,6 +1,7 @@
 import express from 'express';
 import {
     getDashboardAnalytics,
+    getDetailedAnalyticsAlumni,
     getDetailedAnalyticsUsers,
 } from '../controllers/adminAnalyticsController';
 import { protect, requireVerified } from '../middleware/auth';
@@ -24,6 +25,15 @@ router.get(
     requireVerified,
     requireRole(UserRole.ADMIN),
     getDetailedAnalyticsUsers,
+);
+
+// Get detailed alumni analytics
+router.get(
+    '/alumni-analytics',
+    protect,
+    requireVerified,
+    requireRole(UserRole.ADMIN),
+    getDetailedAnalyticsAlumni,
 );
 
 export default router;

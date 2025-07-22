@@ -86,8 +86,11 @@ const getEmptyAnalytics = () => ({
 });
 
 // Get batch-wise analytics
-const getBatchAnalytics = async (): Promise<BatchAnalytics[]> => {
+export const getBatchAnalytics = async (
+    roleFilter?: string,
+): Promise<BatchAnalytics[]> => {
     const now = getUtcDateTime();
+    const baseFilter = roleFilter ? { role: roleFilter } : {};
     const sevenDaysAgo = now.minus({ days: 7 }).toJSDate();
     const thirtyDaysAgo = now.minus({ days: 30 }).toJSDate();
     const currentYear = now.year;
@@ -97,6 +100,9 @@ const getBatchAnalytics = async (): Promise<BatchAnalytics[]> => {
     );
 
     const pipeline: PipelineStage[] = [
+        {
+            $match: baseFilter,
+        },
         {
             $group: {
                 _id: {
@@ -204,13 +210,19 @@ const getBatchAnalytics = async (): Promise<BatchAnalytics[]> => {
 };
 
 // Get department-wise analytics
-const getDepartmentAnalytics = async (): Promise<BranchAnalytics[]> => {
+export const getDepartmentAnalytics = async (
+    roleFilter?: string,
+): Promise<BranchAnalytics[]> => {
     const now = getUtcDateTime();
+    const baseFilter = roleFilter ? { role: roleFilter } : {};
     const sevenDaysAgo = now.minus({ days: 7 }).toJSDate();
     const thirtyDaysAgo = now.minus({ days: 30 }).toJSDate();
     const departments: Department[] = ['AIDS', 'CSE', 'ECE'];
 
     const pipeline: PipelineStage[] = [
+        {
+            $match: baseFilter,
+        },
         {
             $group: {
                 _id: {
