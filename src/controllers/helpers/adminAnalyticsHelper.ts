@@ -195,7 +195,6 @@ export const getUserAnalytics = async () => {
         growth,
         timeline: {
             '1d': dayData.current,
-            '7d': weekData.current,
             '30d': monthData.current,
         },
         recentUsers,
@@ -352,7 +351,7 @@ const getLoginTimelineData = async (
 
 // Get login event timeline data
 const getLoginEventTimeline = async (
-    period: '1d' | '7d' | '30d',
+    period: '1d' | '30d',
 ): Promise<TimelineData[]> => {
     const { start, end } = getDateRange(period);
     const isHourly = period === '1d';
@@ -370,10 +369,9 @@ const getActiveUsers = async (): Promise<number> => {
 
 // Get login analytics
 export const getLoginAnalytics = async () => {
-    const [activeUsers, dayData, weekData, monthData] = await Promise.all([
+    const [activeUsers, dayData, monthData] = await Promise.all([
         getActiveUsers(),
         getLoginEventTimeline('1d'),
-        getLoginEventTimeline('7d'),
         getLoginEventTimeline('30d'),
     ]);
 
@@ -381,7 +379,6 @@ export const getLoginAnalytics = async () => {
         activeUsers,
         timeline: {
             '1d': dayData,
-            '7d': weekData,
             '30d': monthData,
         },
     };

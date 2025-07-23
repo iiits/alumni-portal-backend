@@ -1,10 +1,3 @@
-openapi: 3.0.0
-info:
-    title: Alumni Dashboard API
-    version: 1.0.0
-    description: API for Alumni Dashboard analytics and data
-servers:
-    - url: https://api.example.com/v1
 paths:
     /admin/dashboard:
         get:
@@ -88,18 +81,6 @@ paths:
                                                                             type: string
                                                                             example: '14:00'
                                                                             description: 'Hour in UTC (HH:00 format)'
-                                                                        count:
-                                                                            type: number
-                                                                            example: 5
-                                                            7d:
-                                                                type: array
-                                                                items:
-                                                                    type: object
-                                                                    properties:
-                                                                        date:
-                                                                            type: string
-                                                                            example: '2025-07-15'
-                                                                            description: 'UTC date (YYYY-MM-DD format)'
                                                                         count:
                                                                             type: number
                                                                             example: 5
@@ -233,18 +214,6 @@ paths:
                                                                         count:
                                                                             type: number
                                                                             example: 5
-                                                            7d:
-                                                                type: array
-                                                                items:
-                                                                    type: object
-                                                                    properties:
-                                                                        date:
-                                                                            type: string
-                                                                            example: '2025-07-15'
-                                                                            description: 'UTC date (YYYY-MM-DD format)'
-                                                                        count:
-                                                                            type: number
-                                                                            example: 5
                                                             30d:
                                                                 type: array
                                                                 items:
@@ -349,18 +318,6 @@ paths:
                                                                             type: string
                                                                             example: '14:00'
                                                                             description: 'Hour in UTC (HH:00 format)'
-                                                                        count:
-                                                                            type: number
-                                                                            example: 5
-                                                            7d:
-                                                                type: array
-                                                                items:
-                                                                    type: object
-                                                                    properties:
-                                                                        date:
-                                                                            type: string
-                                                                            example: '2025-07-15'
-                                                                            description: 'UTC date (YYYY-MM-DD format)'
                                                                         count:
                                                                             type: number
                                                                             example: 5
@@ -526,8 +483,6 @@ paths:
                                     data:
                                         type: object
                                         properties:
-                                            overview:
-                                                $ref: '#/components/schemas/UserAnalyticsOverview'
                                             byBatch:
                                                 type: array
                                                 items:
@@ -642,17 +597,28 @@ paths:
                                                                 example:
                                                                     'Software Engineer': 200
                                                                     'Data Scientist': 150
+                                                            topTitles:
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        _id:
+                                                                            type: string
+                                                                            example: 'Abc'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 120
                                                             topLocations:
-                                                                type: object
-                                                                properties:
-                                                                    cities:
-                                                                        type: array
-                                                                        items:
-                                                                            $ref: '#/components/schemas/TopLocation'
-                                                                    countries:
-                                                                        type: array
-                                                                        items:
-                                                                            $ref: '#/components/schemas/TopLocation'
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        _id:
+                                                                            type: string
+                                                                            example: 'Bangalore'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 120
                                                     ongoing:
                                                         type: object
                                                         properties:
@@ -667,17 +633,28 @@ paths:
                                                                 type: object
                                                                 additionalProperties:
                                                                     type: number
+                                                            topTitles:
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        _id:
+                                                                            type: string
+                                                                            example: 'Abc'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 120
                                                             topLocations:
-                                                                type: object
-                                                                properties:
-                                                                    cities:
-                                                                        type: array
-                                                                        items:
-                                                                            $ref: '#/components/schemas/TopLocation'
-                                                                    countries:
-                                                                        type: array
-                                                                        items:
-                                                                            $ref: '#/components/schemas/TopLocation'
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        _id:
+                                                                            type: string
+                                                                            example: 'Bangalore'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 120
                                             education:
                                                 type: object
                                                 properties:
@@ -702,21 +679,28 @@ paths:
                                                                 example:
                                                                     'Computer Science': 300
                                                                     'Electronics': 200
+                                                            topSchools:
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        _id:
+                                                                            type: string
+                                                                            example: 'Abc'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 120
                                                             topLocations:
-                                                                type: object
-                                                                properties:
-                                                                    cities:
-                                                                        type: array
-                                                                        items:
-                                                                            $ref: '#/components/schemas/TopLocation'
-                                                                    countries:
-                                                                        type: array
-                                                                        items:
-                                                                            $ref: '#/components/schemas/TopLocation'
-                                                                    schools:
-                                                                        type: array
-                                                                        items:
-                                                                            $ref: '#/components/schemas/TopLocation'
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        _id:
+                                                                            type: string
+                                                                            example: 'Bangalore'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 120
                                                     ongoing:
                                                         type: object
                                                         properties:
@@ -731,32 +715,52 @@ paths:
                                                                 type: object
                                                                 additionalProperties:
                                                                     type: number
+                                                            topSchools:
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        _id:
+                                                                            type: string
+                                                                            example: 'Abc'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 120
                                                             topLocations:
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        _id:
+                                                                            type: string
+                                                                            example: 'Bangalore'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 120
+                                            locations:
+                                                locations:
+                                                    type: object
+                                                    properties:
+                                                        topCities:
+                                                            type: array
+                                                            items:
                                                                 type: object
                                                                 properties:
-                                                                    cities:
-                                                                        type: array
-                                                                        items:
-                                                                            $ref: '#/components/schemas/TopLocation'
-                                                                    countries:
-                                                                        type: array
-                                                                        items:
-                                                                            $ref: '#/components/schemas/TopLocation'
-                                                                    schools:
-                                                                        type: array
-                                                                        items:
-                                                                            $ref: '#/components/schemas/TopLocation'
-                                            locations:
-                                                type: object
-                                                properties:
-                                                    topCities:
-                                                        type: array
-                                                        items:
-                                                            $ref: '#/components/schemas/TopLocation'
-                                                    topCountries:
-                                                        type: array
-                                                        items:
-                                                            $ref: '#/components/schemas/TopLocation'
+                                                                    _id:
+                                                                        type: string
+                                                                        example: 'Bangalore'
+                                                                    count:
+                                                                        type: number
+                                                                        example: 120
+                                                        topCountries:
+                                                            type: array
+                                                            items:
+                                                                type: object
+                                                                properties:
+                                                                    _id:
+                                                                        type: string
+                                                                        example: 'India'
+                                                                    count:
                                     message:
                                         type: string
                                         example: 'Detailed alumni analytics retrieved successfully'
@@ -1119,7 +1123,7 @@ paths:
             tags:
                 - Admin Analytics
             summary: Get detailed contact analytics
-            description: Get analytics data for contact forms including total, resolved, unresolved counts, and time series for the last 7 and 30 days.
+            description: Get analytics data for contact forms including total, resolved, unresolved counts, and time series for the last 30 days.
             security:
                 - bearerAuth: []
             responses:
@@ -1145,43 +1149,23 @@ paths:
                                             unresolved:
                                                 type: number
                                                 example: 40
-                                            timeline:
-                                                type: object
-                                                properties:
-                                                    7d:
-                                                        type: array
-                                                        items:
-                                                            type: object
-                                                            properties:
-                                                                date:
-                                                                    type: string
-                                                                    example: '2025-07-17'
-                                                                total:
-                                                                    type: number
-                                                                    example: 5
-                                                                resolved:
-                                                                    type: number
-                                                                    example: 3
-                                                                unresolved:
-                                                                    type: number
-                                                                    example: 2
-                                                    30d:
-                                                        type: array
-                                                        items:
-                                                            type: object
-                                                            properties:
-                                                                date:
-                                                                    type: string
-                                                                    example: '2025-07-01'
-                                                                total:
-                                                                    type: number
-                                                                    example: 2
-                                                                resolved:
-                                                                    type: number
-                                                                    example: 1
-                                                                unresolved:
-                                                                    type: number
-                                                                    example: 1
+                                            timeseries:
+                                                type: array
+                                                items:
+                                                    type: object
+                                                    properties:
+                                                        date:
+                                                            type: string
+                                                            example: '2025-07-01'
+                                                        count:
+                                                            type: number
+                                                            example: 2
+                                                        resolved:
+                                                            type: number
+                                                            example: 1
+                                                        unresolved:
+                                                            type: number
+                                                            example: 1
                                     message:
                                         type: string
                                         example: 'Detailed contact analytics retrieved successfully'

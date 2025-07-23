@@ -5,10 +5,12 @@ export interface ContactAnalytics {
     total: number;
     resolved: number;
     unresolved: number;
-    timeline: {
-        '7d': Array<{ date: string; count: number }>;
-        '30d': Array<{ date: string; count: number }>;
-    };
+    timeseries: Array<{
+        date: string;
+        count: number;
+        resolved: number;
+        unresolved: number;
+    }>;
 }
 
 const getTimeline = async (
@@ -68,21 +70,16 @@ const getTimeline = async (
 
 export const getContactAnalyticsDetailed =
     async (): Promise<ContactAnalytics> => {
-        const [total, resolved, unresolved, timeline7d, timeline30d] =
-            await Promise.all([
-                ContactUs.countDocuments(),
-                ContactUs.countDocuments({ resolved: true }),
-                ContactUs.countDocuments({ resolved: false }),
-                getTimeline(7),
-                getTimeline(30),
-            ]);
+        const [total, resolved, unresolved, timeseries] = await Promise.all([
+            ContactUs.countDocuments(),
+            ContactUs.countDocuments({ resolved: true }),
+            ContactUs.countDocuments({ resolved: false }),
+            getTimeline(30),
+        ]);
         return {
             total,
             resolved,
             unresolved,
-            timeline: {
-                '7d': timeline7d,
-                '30d': timeline30d,
-            },
+            timeseries,
         };
     };

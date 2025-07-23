@@ -13,20 +13,14 @@ interface BatchAnalytics {
     batch: number;
     total: number;
     byRole: RoleDistribution;
-    growth: {
-        '7d': GrowthData;
-        '30d': GrowthData;
-    };
+    growth: GrowthData;
 }
 
 interface BranchAnalytics {
     department: Department;
     total: number;
     byRole: RoleDistribution;
-    growth: {
-        '7d': GrowthData;
-        '30d': GrowthData;
-    };
+    growth: GrowthData;
 }
 
 interface UnverifiedUsers {
@@ -79,10 +73,7 @@ const getEmptyAnalytics = () => ({
         alumni: 0,
         student: 0,
     },
-    growth: {
-        '7d': { count: 0, rate: 0 },
-        '30d': { count: 0, rate: 0 },
-    },
+    growth: { count: 0, rate: 0 },
 });
 
 // Get batch-wise analytics
@@ -91,7 +82,6 @@ export const getBatchAnalytics = async (
 ): Promise<BatchAnalytics[]> => {
     const now = getUtcDateTime();
     const baseFilter = roleFilter ? { role: roleFilter } : {};
-    const sevenDaysAgo = now.minus({ days: 7 }).toJSDate();
     const thirtyDaysAgo = now.minus({ days: 30 }).toJSDate();
 
     const batchQuery = roleFilter ? { role: roleFilter } : {};
@@ -107,27 +97,13 @@ export const getBatchAnalytics = async (
                 _id: {
                     batch: '$batch',
                     role: '$role',
-                    period: {
-                        $switch: {
-                            branches: [
-                                {
-                                    case: {
-                                        $gte: ['$createdAt', sevenDaysAgo],
-                                    },
-                                    then: 'last7days',
-                                },
-                                {
-                                    case: {
-                                        $gte: ['$createdAt', thirtyDaysAgo],
-                                    },
-                                    then: 'last30days',
-                                },
-                            ],
-                            default: 'older',
-                        },
+                },
+                count: {
+                    $sum: {
+                        $cond: [{ $gte: ['$createdAt', thirtyDaysAgo] }, 1, 0],
                     },
                 },
-                count: { $sum: 1 },
+                total: { $sum: 1 },
             },
         },
         {
@@ -136,23 +112,20 @@ export const getBatchAnalytics = async (
                 roles: {
                     $push: {
                         role: '$_id.role',
-                        period: '$_id.period',
                         count: '$count',
+                        total: '$total',
                     },
                 },
-                total: { $sum: '$count' },
+                total: { $sum: '$total' },
             },
         },
     ];
 
     const batchResults = await User.aggregate<BatchResults>(pipeline);
-
-    // Create a map for easier access to results
     const batchMap = new Map(batchResults.map(batch => [batch._id, batch]));
 
     return batchYears.map(year => {
         const batch = batchMap.get(year);
-
         if (!batch) {
             return {
                 batch: year,
@@ -164,41 +137,15 @@ export const getBatchAnalytics = async (
             alumni: 0,
             student: 0,
         };
-
-        const last7Days: RoleDistribution = {
-            admin: 0,
-            alumni: 0,
-            student: 0,
-        };
-
-        const last30Days: RoleDistribution = {
-            admin: 0,
-            alumni: 0,
-            student: 0,
-        };
-
-        batch.roles.forEach((data: RoleStats) => {
-            byRole[data.role as keyof RoleDistribution] += data.count;
-
-            if (data.period === 'last7days') {
-                last7Days[data.role as keyof RoleDistribution] += data.count;
-            }
-            if (data.period === 'last30days' || data.period === 'last7days') {
-                last30Days[data.role as keyof RoleDistribution] += data.count;
-            }
+        let growthCount = 0;
+        batch.roles.forEach((data: any) => {
+            byRole[data.role as keyof RoleDistribution] += data.total;
+            growthCount += data.count;
         });
-
         const growth = {
-            '7d': {
-                count: sumValues(last7Days),
-                rate: calculateGrowthRate(sumValues(last7Days), batch.total),
-            },
-            '30d': {
-                count: sumValues(last30Days),
-                rate: calculateGrowthRate(sumValues(last30Days), batch.total),
-            },
+            count: growthCount,
+            rate: calculateGrowthRate(growthCount, batch.total),
         };
-
         return {
             batch: batch._id,
             total: batch.total,
@@ -214,14 +161,10 @@ export const getDepartmentAnalytics = async (
 ): Promise<BranchAnalytics[]> => {
     const now = getUtcDateTime();
     const baseFilter = roleFilter ? { role: roleFilter } : {};
-    const sevenDaysAgo = now.minus({ days: 7 }).toJSDate();
     const thirtyDaysAgo = now.minus({ days: 30 }).toJSDate();
-
-    // Get unique departments from DB
     const departments = (
         await User.distinct('department')
     ).sort() as Department[];
-
     const pipeline: PipelineStage[] = [
         {
             $match: baseFilter,
@@ -231,27 +174,13 @@ export const getDepartmentAnalytics = async (
                 _id: {
                     department: '$department',
                     role: '$role',
-                    period: {
-                        $switch: {
-                            branches: [
-                                {
-                                    case: {
-                                        $gte: ['$createdAt', sevenDaysAgo],
-                                    },
-                                    then: 'last7days',
-                                },
-                                {
-                                    case: {
-                                        $gte: ['$createdAt', thirtyDaysAgo],
-                                    },
-                                    then: 'last30days',
-                                },
-                            ],
-                            default: 'older',
-                        },
+                },
+                count: {
+                    $sum: {
+                        $cond: [{ $gte: ['$createdAt', thirtyDaysAgo] }, 1, 0],
                     },
                 },
-                count: { $sum: 1 },
+                total: { $sum: 1 },
             },
         },
         {
@@ -260,23 +189,18 @@ export const getDepartmentAnalytics = async (
                 roles: {
                     $push: {
                         role: '$_id.role',
-                        period: '$_id.period',
                         count: '$count',
+                        total: '$total',
                     },
                 },
-                total: { $sum: '$count' },
+                total: { $sum: '$total' },
             },
         },
     ];
-
     const departmentResults = await User.aggregate<DepartmentResults>(pipeline);
-
-    // Create a map for easier access to results
     const deptMap = new Map(departmentResults.map(dept => [dept._id, dept]));
-
     return departments.map(dept => {
         const deptData = deptMap.get(dept);
-
         if (!deptData) {
             return {
                 department: dept,
@@ -288,44 +212,15 @@ export const getDepartmentAnalytics = async (
             alumni: 0,
             student: 0,
         };
-
-        const last7Days: RoleDistribution = {
-            admin: 0,
-            alumni: 0,
-            student: 0,
-        };
-
-        const last30Days: RoleDistribution = {
-            admin: 0,
-            alumni: 0,
-            student: 0,
-        };
-
-        deptData.roles.forEach((data: RoleStats) => {
-            byRole[data.role as keyof RoleDistribution] += data.count;
-
-            if (data.period === 'last7days') {
-                last7Days[data.role as keyof RoleDistribution] += data.count;
-            }
-            if (data.period === 'last30days' || data.period === 'last7days') {
-                last30Days[data.role as keyof RoleDistribution] += data.count;
-            }
+        let growthCount = 0;
+        deptData.roles.forEach((data: any) => {
+            byRole[data.role as keyof RoleDistribution] += data.total;
+            growthCount += data.count;
         });
-
         const growth = {
-            '7d': {
-                count: sumValues(last7Days),
-                rate: calculateGrowthRate(sumValues(last7Days), deptData.total),
-            },
-            '30d': {
-                count: sumValues(last30Days),
-                rate: calculateGrowthRate(
-                    sumValues(last30Days),
-                    deptData.total,
-                ),
-            },
+            count: growthCount,
+            rate: calculateGrowthRate(growthCount, deptData.total),
         };
-
         return {
             department: dept,
             total: deptData.total,
