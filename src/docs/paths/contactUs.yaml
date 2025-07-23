@@ -139,17 +139,6 @@ paths:
             description: Retrieve all contact form submissions for a specific user
             security:
                 - bearerAuth: []
-            parameters:
-                - in: body
-                  name: userId
-                  required: true
-                  schema:
-                      type: object
-                      properties:
-                          userId:
-                              type: string
-                      required:
-                          - userId
             responses:
                 200:
                     description: Contact forms retrieved successfully
@@ -224,29 +213,3 @@ paths:
                     description: Contact query not found
                 500:
                     description: Server error
-
-components:
-    schemas:
-        Contact:
-            type: object
-            properties:
-                id:
-                    type: string
-                user:
-                    type: string
-                name:
-                    type: string
-                email:
-                    type: string
-                subject:
-                    type: string
-                message:
-                    type: string
-                resolved:
-                    type: boolean
-                createdAt:
-                    type: string
-                    format: date-time
-                updatedAt:
-                    type: string
-                    format: date-time

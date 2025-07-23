@@ -162,7 +162,7 @@ export const getContactFormForUser = async (
     res: Response,
     next: NextFunction,
 ): Promise<void> => {
-    const { userId } = req.body;
+    const userId = req.user?.id;
 
     if (!userId) {
         apiError(res, 'User ID is required', 400);
@@ -170,9 +170,12 @@ export const getContactFormForUser = async (
     }
 
     try {
-        const contactForms = await ContactUs.find({ user: userId }).sort({
-            createdAt: -1,
-        });
+        const contactForms = await ContactUs.find({ user: userId })
+            .sort({
+                createdAt: -1,
+            })
+            .select('-__v -_id')
+            .lean();
         apiSuccess(
             res,
             { contactForms },
@@ -222,6 +225,7 @@ export const respondToContactQuery = async (
         }
 
         contactQuery.resolved = true;
+        contactQuery.resolutionMessage = message;
         await contactQuery.save();
         apiSuccess(
             res,

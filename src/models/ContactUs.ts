@@ -8,6 +8,7 @@ export interface IContact extends Document {
     subject: string;
     message: string;
     resolved: boolean;
+    resolutionMessage?: string;
     createdAt: Date;
 }
 
@@ -41,6 +42,9 @@ const ContactSchema = new mongoose.Schema<IContact>({
     resolved: {
         type: Boolean,
         default: false,
+    },
+    resolutionMessage: {
+        type: String,
     },
     createdAt: {
         type: Date,

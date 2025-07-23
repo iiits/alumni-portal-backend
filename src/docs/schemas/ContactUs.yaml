@@ -25,6 +25,12 @@ components:
                 message:
                     type: string
                     description: Contact message content
+                resolved:
+                    type: boolean
+                    description: Indicates if the message has been resolved
+                resolutionMessage:
+                    type: string
+                    description: Message provided when the contact is resolved
                 createdAt:
                     type: string
                     format: date-time

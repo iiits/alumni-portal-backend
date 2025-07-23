@@ -277,10 +277,3 @@ paths:
                     description: Too many reset attempts
                 500:
                     description: Server error
-
-components:
-    securitySchemes:
-        bearerAuth:
-            type: http
-            scheme: bearer
-            bearerFormat: JWT
