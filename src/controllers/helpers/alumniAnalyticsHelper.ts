@@ -40,6 +40,7 @@ interface JobAnalytics {
         byJobType: Record<string, number>;
         topTitles: TopLocation[];
         topLocations: TopLocation[];
+        topCompanies: TopLocation[];
     };
     ongoing: {
         total: number;
@@ -47,6 +48,7 @@ interface JobAnalytics {
         byJobType: Record<string, number>;
         topTitles: TopLocation[];
         topLocations: TopLocation[];
+        topCompanies: TopLocation[];
     };
 }
 
@@ -100,6 +102,9 @@ const getJobAnalytics = async (): Promise<JobAnalytics> => {
                             locations: {
                                 $push: '$jobPosition.location',
                             },
+                            companies: {
+                                $push: '$jobPosition.company',
+                            },
                         },
                     },
                 ],
@@ -134,6 +139,9 @@ const getJobAnalytics = async (): Promise<JobAnalytics> => {
                             locations: {
                                 $push: '$jobPosition.location',
                             },
+                            companies: {
+                                $push: '$jobPosition.company',
+                            },
                         },
                     },
                 ],
@@ -142,12 +150,6 @@ const getJobAnalytics = async (): Promise<JobAnalytics> => {
     ];
 
     const [result] = await AlumniDetails.aggregate(pipeline);
-    const empty = {
-        total: 0,
-        byJobType: {},
-        byTitle: {},
-        topLocations: { cities: [], countries: [] },
-    };
 
     const processGroup = (group: any) => {
         if (!group || !group.length) {
@@ -157,6 +159,7 @@ const getJobAnalytics = async (): Promise<JobAnalytics> => {
                 byJobType: {},
                 topTitles: [],
                 topLocations: [],
+                topCompanies: [],
             };
         }
         const data = group[0];
@@ -193,6 +196,14 @@ const getJobAnalytics = async (): Promise<JobAnalytics> => {
             {},
         );
 
+        const companiesCount = data.companies.reduce(
+            (acc: Record<string, number>, company: string) => {
+                if (company) acc[company] = (acc[company] || 0) + 1;
+                return acc;
+            },
+            {},
+        );
+
         return {
             total: data.total,
             byEmploymentType,
@@ -202,6 +213,10 @@ const getJobAnalytics = async (): Promise<JobAnalytics> => {
                 .sort((a, b) => b.count - a.count)
                 .slice(0, 10),
             topLocations: Object.entries(locationsCount)
+                .map(([_id, count]) => ({ _id, count: count as number }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 10),
+            topCompanies: Object.entries(companiesCount)
                 .map(([_id, count]) => ({ _id, count: count as number }))
                 .sort((a, b) => b.count - a.count)
                 .slice(0, 10),

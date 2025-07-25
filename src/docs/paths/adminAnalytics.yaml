@@ -619,6 +619,17 @@ paths:
                                                                         count:
                                                                             type: number
                                                                             example: 120
+                                                            topCompanies:
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        _id:
+                                                                            type: string
+                                                                            example: 'Google'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 50
                                                     ongoing:
                                                         type: object
                                                         properties:
@@ -655,6 +666,17 @@ paths:
                                                                         count:
                                                                             type: number
                                                                             example: 120
+                                                            topCompanies:
+                                                                type: array
+                                                                items:
+                                                                    type: object
+                                                                    properties:
+                                                                        _id:
+                                                                            type: string
+                                                                            example: 'Google'
+                                                                        count:
+                                                                            type: number
+                                                                            example: 30
                                             education:
                                                 type: object
                                                 properties:
