@@ -229,8 +229,19 @@ export const updateAlumniDetails = async (
             apiUnauthorized(res, 'Not authorized to update this profile');
             return;
         }
+        const user = await User.findOne({id:req.params.id})
+            .select('alumniDetails')
+            .lean();
 
-        const id = req.params.id;
+        if (!user?.alumniDetails) {
+            apiNotFound(res, 'Alumni details not found for this user');
+            return;
+        }
+        if (!user?.alumniDetails) {
+            apiNotFound(res, 'Alumni details not found for this user');
+            return;
+        }
+        const id = user.alumniDetails;
         const { jobPosition, education, ...rest } = req.body;
 
         const formattedJobPosition = jobPosition?.map((job: any) => ({
