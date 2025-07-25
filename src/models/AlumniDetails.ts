@@ -4,6 +4,7 @@ export interface IAlumniDetails extends Document {
     id: string;
     jobPosition: {
         title: string;
+        company: string;
         type:
             | 'full-time'
             | 'part-time'
@@ -45,6 +46,7 @@ const AlumniDetailsSchema = new mongoose.Schema<IAlumniDetails>({
     jobPosition: [
         {
             title: { type: String, required: true },
+            company: { type: String, required: true },
             type: {
                 type: String,
                 enum: [

@@ -20,6 +20,7 @@ components:
                         type: object
                         required:
                             - title
+                            - company
                             - type
                             - start
                             - location
@@ -29,6 +30,9 @@ components:
                             title:
                                 type: string
                                 description: Job title
+                            company:
+                                type: string
+                                description: Company or Organization
                             type:
                                 type: string
                                 enum: [full-time, part-time, freelancer, intern, entrepreneur]
