@@ -202,8 +202,19 @@ paths:
             tags:
                 - Authentication
             summary: Request password reset
-            security:
-                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - email
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                    example: 'user@iiits.in'
             responses:
                 200:
                     description: Password reset email sent successfully
@@ -220,8 +231,6 @@ paths:
                                         example: 'Password reset link sent to email'
                 400:
                     description: Invalid request
-                401:
-                    description: Unauthorized
                 404:
                     description: User not found
                 429:
@@ -234,8 +243,6 @@ paths:
             tags:
                 - Authentication
             summary: Reset password using token
-            security:
-                - bearerAuth: []
             requestBody:
                 required: true
                 content:
@@ -269,8 +276,6 @@ paths:
                                         example: 'Password reset successful'
                 400:
                     description: Invalid token or password
-                401:
-                    description: Unauthorized
                 404:
                     description: User not found
                 429:

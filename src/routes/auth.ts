@@ -35,19 +35,11 @@ router.post('/verify-email', verificationLimiter, verifyEmail);
 // Request password reset
 router.post(
     '/request-reset-password',
-    protect,
-    requireVerified,
     verificationLimiter,
     requestPasswordReset,
 );
 
 // Reset password
-router.post(
-    '/reset-password',
-    protect,
-    requireVerified,
-    verificationLimiter,
-    resetPassword,
-);
+router.post('/reset-password', verificationLimiter, resetPassword);
 
 export default router;
