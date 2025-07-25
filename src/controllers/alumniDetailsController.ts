@@ -141,7 +141,7 @@ export const getAlumniDetails = async (
 
         const users = await User.find(filters)
             .select(
-                'id name collegeEmail personalEmail userId username batch department profiles role',
+                'id name collegeEmail personalEmail userId username batch department profiles role -_id',
             )
             .sort({ createdAt: -1 })
             .skip(skip)

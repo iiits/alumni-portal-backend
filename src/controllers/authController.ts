@@ -279,15 +279,15 @@ export const requestPasswordReset = async (
     res: Response,
 ): Promise<void> => {
     try {
-        const userId = req.user?.id;
-
-        if (!userId) {
-            apiError(res, 'UserId not provided', 400);
+        const { email } = req.body;
+        if (!email) {
+            apiError(res, 'Email is required', 400);
             return;
         }
 
+        // Find user by college or personal email
         const user = await User.findOne({
-            id: userId,
+            $or: [{ collegeEmail: email }, { personalEmail: email }],
         });
 
         if (!user) {
@@ -297,7 +297,6 @@ export const requestPasswordReset = async (
 
         // Generate & Save password reset token
         const token = crypto.randomBytes(32).toString('hex');
-
         await PasswordResetToken.create({
             owner: user.id,
             token: token,

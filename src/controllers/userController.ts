@@ -97,7 +97,7 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
         const [users, total] = await Promise.all([
             User.find(filters)
                 .select(
-                    'id name collegeEmail personalEmail userId username batch department profiles role verified',
+                    'id name collegeEmail personalEmail userId username batch department profiles.type profiles.link profiles.visibility role verified -_id',
                 )
                 .sort({ createdAt: -1 })
                 .skip(skip)
